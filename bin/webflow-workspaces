@@ -1,0 +1,59 @@
+#!/usr/bin/env bash
+# webflow-workspaces — manage multiple Webflow MCP server connections
+# (one per client/org) safely, keeping tokens out of agent context.
+set -euo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
+export WFW_LIB_DIR="$REPO_ROOT/lib"
+export WFW_COMMANDS_DIR="$REPO_ROOT/commands"
+
+# shellcheck source=../lib/bootstrap.sh
+source "$WFW_LIB_DIR/bootstrap.sh"
+
+usage() {
+  cat <<'EOF'
+webflow-workspaces — manage per-client Webflow MCP connections
+
+Usage: webflow-workspaces <command> [args]
+
+Commands:
+  add <org> [--label "Name"]           Register a new org (metadata only)
+  secret-set <org>                     Interactively store a token (run yourself, in your own terminal)
+  rotate <org>                         Interactively replace a stored token (same as secret-set)
+  list                                 List registered orgs and last test status
+  inspect <org> [--live]               Show profile detail; --live re-runs test first
+  test <org>                           Validate the stored token against the Webflow API
+  install <org> <client> [--scope user|project] [--force]
+                                        Write/merge an mcpServers entry for a client
+                                        (client: claude-code | claude-desktop | cursor)
+  remove <org> --yes [--from client:scope]...
+                                        Delete an org's profile + token, optionally strip client entries
+  debug <org>                          Run diagnostics when something isn't working
+
+Security note: this tool never accepts a token as a command-line argument
+and never prints one. secret-set/rotate require a real interactive TTY.
+EOF
+}
+
+cmd="${1:-}"
+[[ -n "$cmd" ]] || { usage; exit 1; }
+shift || true
+
+case "$cmd" in
+  add|list|inspect|test|install|remove|rotate|debug|secret-set)
+    # shellcheck disable=SC1090
+    source "$WFW_COMMANDS_DIR/$cmd.sh" "$@"
+    ;;
+  run-mcp)
+    exec "$WFW_COMMANDS_DIR/run-mcp.sh" "$@"
+    ;;
+  -h|--help|help)
+    usage
+    ;;
+  *)
+    echo "error: unknown command '$cmd'" >&2
+    usage
+    exit 1
+    ;;
+esac

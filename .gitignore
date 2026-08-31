@@ -1,0 +1,5 @@
+.shipstudio/
+.DS_Store
+*.bak
+.mcp.json
+.cursor/
