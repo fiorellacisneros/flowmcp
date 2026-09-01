@@ -33,7 +33,17 @@ else
 fi
 
 if wfw_json_mode "$json_flag"; then
-  jq --argjson connected "$connected" '. + {connected: $connected}' "$(wfw_profile_path "$org")"
+  if [[ "$connected" == "false" ]]; then
+    if [[ "$auth_method" == "mcp-remote" ]]; then
+      next="[\"webflow-workspaces connect $org\"]"
+    else
+      next="[\"webflow-workspaces secret-set $org\"]"
+    fi
+  else
+    next="[\"webflow-workspaces test $org\"]"
+  fi
+  jq --argjson connected "$connected" --argjson next "$next" \
+    '. + {connected: $connected, next_steps: $next}' "$(wfw_profile_path "$org")"
   exit 0
 fi
 

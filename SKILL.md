@@ -11,6 +11,14 @@ per client/org, so an agency can hold separate Webflow API tokens for its own
 workspace and for each customer's workspace at once — installed into Claude
 Code, Claude Desktop, and/or Cursor.
 
+## Start here: `webflow-workspaces schema`
+
+Run this once per session instead of parsing `--help`. It returns
+machine-readable JSON: every command's usage, whether it mutates state,
+whether it requires a real TTY, whether it's destructive, and the shape of
+its JSON output. Use it to confirm a command's flags exist before calling
+it, rather than guessing from this doc if the two ever drift.
+
 ## The one rule that matters
 
 **You (the agent) must never see, hold, echo, or transmit a real Webflow API
@@ -24,11 +32,21 @@ the user to paste it into chat. The tool is built so you never need to:
 - Every other command (`add`, `list`, `inspect`, `test`, `install`, `remove`,
   `debug`) only ever touches metadata or a keychain *reference*. Run these
   freely via your Bash tool.
-- `list`, `inspect`, `test`, and `debug` print structured JSON automatically
-  whenever stdout isn't a real TTY — which includes every call you make
-  through your Bash tool. You don't need to pass `--json` yourself; parse
-  the output directly instead of scraping the colored human-readable text
-  (that text only appears when a human is watching a real terminal).
+- `list`, `inspect`, `test`, `debug`, `install`, `remove`, and `rename` print
+  structured JSON automatically whenever stdout isn't a real TTY — which
+  includes every call you make through your Bash tool. You don't need to
+  pass `--json` yourself; parse the output directly instead of scraping the
+  colored human-readable text (that text only appears when a human is
+  watching a real terminal). Where there's an obvious follow-up action, the
+  JSON includes `next_steps: [string]` — prefer that over inferring the next
+  command yourself.
+- `install`, `remove`, and `rename` are the only commands that write to a
+  real, shared client config file. Pass `--dry-run` first when you're not
+  certain what a call will change, and show the user the diff before
+  re-running for real — this matters more than it sounds: a test-org name
+  that collides with a real org's name can silently repoint or delete a real
+  entry (see `friction.md` in the repo for the incident that made this a
+  standing rule, not a suggestion).
 - `install` never writes a literal token into a client's config file. It
   points the `command` field at `commands/run-mcp.sh <org>`, which looks the
   token up from the OS keychain (or the chmod-600 file fallback) at the
@@ -136,15 +154,18 @@ webflow-workspaces connect <org> [--label "Name"]   # opens a browser, needs the
 webflow-workspaces list [--json]
 webflow-workspaces inspect <org> [--live] [--json]
 webflow-workspaces test <org> [--json]
-webflow-workspaces install <org> <client> [--scope user|project] [--force]
+webflow-workspaces install <org> <client> [--scope user|project] [--force] [--dry-run] [--json]
                                                      # client: claude-code | claude-desktop | cursor
-webflow-workspaces remove <org> --yes [--from client:scope]...
+webflow-workspaces remove <org> --yes [--from client:scope]... [--dry-run] [--json]
+webflow-workspaces rename <old-org> <new-org> [--dry-run] [--json]
 webflow-workspaces debug <org> [--json]
+webflow-workspaces schema                           # always JSON — run this first
 ```
 
 `--json` is implicit whenever stdout isn't a TTY, so you (the agent) get it by
 default — the flag exists for a human who wants machine output in their own
-terminal.
+terminal. `schema` is always JSON regardless of TTY, since it's meant to be
+run by an agent at session start.
 
 ## Storage layout (for context, not something you normally touch directly)
 

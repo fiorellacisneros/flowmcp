@@ -4,6 +4,48 @@ Manage multiple [`webflow-mcp-server`](https://www.npmjs.com/package/webflow-mcp
 connections — one per client — without ever letting a Webflow API token pass
 through an AI agent's context.
 
+Built [by human, for human](https://www.forhuman.studio/).
+
+## Install
+
+```bash
+npm install -g @forhuman/webflow-workspaces
+```
+
+Installs both `webflow-workspaces` and the short alias `ww`. Requires
+`bash`, `jq`, `curl`, and Node/`npx`. On macOS the `security` CLI (ships with
+the OS) is used for keychain access; on Linux install `libsecret-tools`
+(Debian/Ubuntu: `apt install libsecret-tools`) for keychain support, or
+accept the `chmod 600` file fallback.
+
+## Quick start
+
+```bash
+ww connect acme --label "Acme Corp"
+# opens your browser -> client approves access -> Ctrl+C once connected -> done
+
+ww test acme
+ww install acme claude-code --scope project
+```
+
+No OAuth App to create, no client ID/secret to manage — `connect` shells out
+to [`mcp-remote`](https://www.npmjs.com/package/mcp-remote) against Webflow's
+own hosted MCP server, which supports Dynamic Client Registration and PKCE.
+No browser available (headless environment)? Use a manually-pasted token
+instead:
+
+```bash
+ww add acme --label "Acme Corp"
+ww secret-set acme     # run this yourself, in your own terminal — TTY only
+ww test acme
+ww install acme claude-code --scope project
+# restart the target app to pick up the new MCP server
+```
+
+Ask `ww schema` for a machine-readable map of every command — usage, JSON
+shape, whether it mutates, requires a TTY, or is destructive. That's the
+first thing an agent driving this CLI should run.
+
 ## Why
 
 If you run an agency, you need one Webflow API token per client workspace
@@ -31,82 +73,6 @@ AI agent driving your terminal should be able to add, list, test, install,
 and debug connections on your behalf — but should never be in the loop for
 the token itself.
 
-## Install
-
-```bash
-git clone <this-repo> ~/.local/share/webflow-workspaces
-ln -s ~/.local/share/webflow-workspaces/bin/webflow-workspaces /usr/local/bin/webflow-workspaces
-ln -s ~/.local/share/webflow-workspaces/bin/webflow-workspaces /usr/local/bin/ww   # optional short alias
-```
-
-Or via npm, which installs both names automatically:
-
-```bash
-npm install -g @forhuman/webflow-workspaces
-```
-
-Every command below works identically as `webflow-workspaces <command>` or
-as the short alias `ww <command>`.
-
-Requires `bash`, `jq`, `curl`, and Node/`npx` (to run `mcp-remote` and/or
-`webflow-mcp-server`). On macOS the `security` CLI (ships with the OS) is
-used for keychain access; on Linux install `libsecret-tools` (Debian/Ubuntu:
-`apt install libsecret-tools`) for keychain support, or accept the
-`chmod 600` file fallback.
-
-To use it as a Claude Code skill, symlink or copy this repo into
-`.claude/skills/webflow-workspaces/` (project-level) or
-`~/.claude/skills/webflow-workspaces/` (user-level) — `SKILL.md` at the repo
-root is the skill definition.
-
-## Quick start
-
-There are two ways to connect a client: **`connect` (recommended)** — the
-client approves access in their own browser, no token ever copy/pasted, no
-setup required — or a manually-pasted Personal Access Token, for headless
-environments with no browser.
-
-### Option A — `connect` (recommended, zero setup)
-
-```bash
-webflow-workspaces connect acme --label "Acme Corp"
-# opens your browser -> client logs into their Webflow account -> approves ->
-# press Ctrl+C once you see it connect -> done
-
-webflow-workspaces test acme
-webflow-workspaces install acme claude-code --scope project
-```
-
-No OAuth App to create, no client ID/secret to manage. This works by
-running [`mcp-remote`](https://www.npmjs.com/package/mcp-remote) against
-Webflow's own hosted MCP server (`mcp.webflow.com`), which supports Dynamic
-Client Registration and PKCE — verified directly against the real endpoint,
-see [Security model](#security-model--what-this-does-and-doesnt-protect-against)
-for why this is safe to do without an embedded secret, unlike the classic
-Data API OAuth flow. `mcp-remote` handles the OAuth dance, browser opening,
-and hourly token refresh itself; we just give each org an isolated
-`MCP_REMOTE_CONFIG_DIR` so sessions never mix.
-
-### Option B — manual token (no browser available)
-
-```bash
-# 1. Register a client (agent-safe — no secret involved)
-webflow-workspaces add acme --label "Acme Corp"
-
-# 2. Store its token — run this yourself, in your own terminal.
-#    It will NOT run non-interactively (e.g. via an agent's tool call).
-webflow-workspaces secret-set acme
-
-# 3. Verify it works
-webflow-workspaces test acme
-
-# 4. Install into a client
-webflow-workspaces install acme claude-code --scope project
-# or: claude-desktop | cursor, --scope user|project
-
-# 5. Restart the target app to pick up the new MCP server.
-```
-
 ## Commands
 
 | Command | What it does |
@@ -118,15 +84,36 @@ webflow-workspaces install acme claude-code --scope project
 | `list [--json]` | List orgs + last test status (no secrets) |
 | `inspect <org> [--live] [--json]` | Show profile detail; `--live` re-runs `test` first |
 | `test <org> [--json]` | Validate the stored credentials |
-| `install <org> <client> [--scope user\|project] [--force]` | Merge an `mcpServers` entry into a client config |
-| `remove <org> --yes [--from client:scope]...` | Delete profile + credentials, optionally strip client entries |
+| `install <org> <client> [--scope user\|project] [--force] [--dry-run] [--json]` | Merge an `mcpServers` entry into a client config |
+| `remove <org> --yes [--from client:scope]... [--dry-run] [--json]` | Delete profile + credentials, optionally strip client entries |
+| `rename <old-org> <new-org> [--dry-run] [--json]` | Rename an org — no re-login needed |
 | `debug <org> [--json]` | Diagnose profile/credential/network/config issues |
+| `schema` | Machine-readable reference of every command's usage and JSON output shape |
 
 Supported clients for `install`: `claude-code`, `claude-desktop`, `cursor`.
 
-`list`/`inspect`/`test`/`debug` print JSON automatically whenever stdout
-isn't a real TTY (piped, redirected, or invoked by an agent's tool call) —
-`--json` only matters when you want machine output in your own terminal.
+`list`/`inspect`/`test`/`debug`/`install`/`remove`/`rename` print JSON
+automatically whenever stdout isn't a real TTY (piped, redirected, or
+invoked by an agent's tool call) — `--json` only matters when you want
+machine output in your own terminal. JSON responses include a `next_steps`
+array naming the follow-up command, when there is an obvious one.
+
+`install`, `remove`, and `rename` are the only commands that touch a real,
+shared client config file (Claude Code/Desktop/Cursor) — the one place here
+where a wrong call has a real blast radius — so all three support `--dry-run`
+to preview the change before it's written, and `remove` requires an explicit
+`--yes` with no interactive fallback.
+
+## For agents
+
+Symlink or copy this repo into `.claude/skills/webflow-workspaces/`
+(project-level) or `~/.claude/skills/webflow-workspaces/` (user-level) —
+[`SKILL.md`](SKILL.md) at the repo root is the skill definition an agent
+reads. It documents the same JSON contract as `ww schema`, plus the workflow
+an agent should follow: never call `secret-set`/`rotate` on the user's
+behalf, always check `ww schema` once per session instead of `--help`, and
+prefer `--dry-run` before any `install`/`remove`/`rename` you're not certain
+about.
 
 ## How credentials stay out of client configs
 
@@ -219,6 +206,20 @@ path (`run-mcp.sh`) generalizes to any local MCP server that authenticates
 via a single bearer-token env var. `$WFW_MCP_URL` in `lib/common.sh` and
 the `webflow-mcp-server` reference in `run-mcp.sh` are the two places with
 Webflow hardcoded today.
+
+## Links
+
+- [SKILL.md](SKILL.md) — the agent-facing manual this CLI ships with
+- [CONTRIBUTING.md](CONTRIBUTING.md) — layout, the one hard rule, how to test safely
+- [cases/webflow-workspaces.md](cases/webflow-workspaces.md) — how this CLI was built, what broke, what got rejected
+- Webflow MCP server: https://www.npmjs.com/package/webflow-mcp-server
+- mcp-remote: https://www.npmjs.com/package/mcp-remote
+
+## Contributing
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) — layout, the one non-negotiable rule
+about tokens, and how to test against an isolated environment without ever
+touching a real client's config.
 
 ## License
 

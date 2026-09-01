@@ -30,13 +30,16 @@ auth_method="$(jq -r '.auth_method // "pat"' <<<"$(wfw_profile_read "$org")")"
 wfw_test_emit() {
   local status="$1" hint="${2:-}"
   if wfw_json_mode "$json_flag"; then
+    local next_hint="$hint"
+    [[ "$status" == "ok" ]] && next_hint="webflow-workspaces install $org <client>"
     jq -nc \
       --arg org "$org" --arg auth "$auth_method" --arg status "$status" \
       --arg error "$err_msg" --argjson scopes "${scopes_json:-[]}" \
-      --argjson sites "${sites_count:-null}" \
+      --argjson sites "${sites_count:-null}" --arg next_hint "$next_hint" \
       '{org: $org, auth_method: $auth, status: $status,
         sites_count: $sites, scopes: $scopes,
-        error: (if $error == "" then null else $error end)}'
+        error: (if $error == "" then null else $error end),
+        next_steps: (if $next_hint == "" then [] else [$next_hint] end)}'
   else
     if [[ "$status" == "ok" ]]; then
       if [[ "$auth_method" == "mcp-remote" ]]; then

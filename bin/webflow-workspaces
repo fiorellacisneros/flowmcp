@@ -47,6 +47,7 @@ usage() {
   wfw_cmd_line "remove" "<org> --yes [--from client:scope]... — delete profile + credentials"
   wfw_cmd_line "debug" "<org> — diagnose a broken connection"
   wfw_cmd_line "rename" "<old-org> <new-org> — no re-login needed"
+  wfw_cmd_line "schema" "machine-readable command/JSON reference for agents"
   echo
   echo "${WFW_C_DIM}security · this tool never accepts a token as a command-line argument and${WFW_C_RESET}"
   echo "${WFW_C_DIM}never prints one. secret-set/rotate require a real interactive TTY; connect${WFW_C_RESET}"
@@ -58,7 +59,7 @@ cmd="${1:-}"
 shift || true
 
 case "$cmd" in
-  add|list|inspect|test|install|remove|rotate|debug|secret-set|connect|rename)
+  add|list|inspect|test|install|remove|rotate|debug|secret-set|connect|rename|schema)
     # shellcheck disable=SC1090
     source "$WFW_COMMANDS_DIR/$cmd.sh" "$@"
     ;;

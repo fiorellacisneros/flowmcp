@@ -39,7 +39,7 @@ else
   wfw_check "profile" "fail" "no profile registered. Run: webflow-workspaces add $org"
   if wfw_json_mode "$json_flag"; then
     jq -nc --arg org "$org" --argjson checks "$(printf '%s\n' "${WFW_CHECKS[@]}" | jq -sc '.')" \
-      '{org: $org, checks: $checks}'
+      '{org: $org, checks: $checks, next_steps: ["webflow-workspaces add \($org)"]}'
   fi
   exit 1
 fi
@@ -115,7 +115,8 @@ done
 
 if wfw_json_mode "$json_flag"; then
   jq -nc --arg org "$org" --argjson checks "$(printf '%s\n' "${WFW_CHECKS[@]}" | jq -sc '.')" \
-    '{org: $org, checks: $checks}'
+    '{org: $org, checks: $checks,
+      next_steps: [$checks[] | select(.level == "fail") | .detail | select(startswith("Run: ") or test("webflow-workspaces")) ] }'
 else
   echo "== done =="
 fi
