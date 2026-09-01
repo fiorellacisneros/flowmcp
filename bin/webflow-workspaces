@@ -3,7 +3,14 @@
 # (one per client/org) safely, keeping tokens out of agent context.
 set -euo pipefail
 
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# Resolve through symlinks (e.g. npm link / global npm bin) to the real file.
+SOURCE="${BASH_SOURCE[0]}"
+while [ -h "$SOURCE" ]; do
+  DIR="$(cd -P "$(dirname "$SOURCE")" && pwd)"
+  SOURCE="$(readlink "$SOURCE")"
+  [[ "$SOURCE" != /* ]] && SOURCE="$DIR/$SOURCE"
+done
+SCRIPT_DIR="$(cd -P "$(dirname "$SOURCE")" && pwd)"
 REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 export WFW_LIB_DIR="$REPO_ROOT/lib"
 export WFW_COMMANDS_DIR="$REPO_ROOT/commands"
@@ -11,29 +18,39 @@ export WFW_COMMANDS_DIR="$REPO_ROOT/commands"
 # shellcheck source=../lib/bootstrap.sh
 source "$WFW_LIB_DIR/bootstrap.sh"
 
+# wfw_cmd_line <name> <description> — pads <name> to a fixed width BEFORE
+# adding color codes, so visible columns line up regardless of ANSI escapes.
+wfw_cmd_line() {
+  local name="$1" desc="$2" padded
+  padded="$(printf "%-11s" "$name")"
+  printf "  %s%s%s %s\n" "$WFW_C_BOLD" "$padded" "$WFW_C_RESET" "$desc"
+}
+
 usage() {
-  cat <<'EOF'
-webflow-workspaces — manage per-client Webflow MCP connections
-
-Usage: webflow-workspaces <command> [args]
-
-Commands:
-  add <org> [--label "Name"]           Register a new org (metadata only)
-  secret-set <org>                     Interactively store a token (run yourself, in your own terminal)
-  rotate <org>                         Interactively replace a stored token (same as secret-set)
-  list                                 List registered orgs and last test status
-  inspect <org> [--live]               Show profile detail; --live re-runs test first
-  test <org>                           Validate the stored token against the Webflow API
-  install <org> <client> [--scope user|project] [--force]
-                                        Write/merge an mcpServers entry for a client
-                                        (client: claude-code | claude-desktop | cursor)
-  remove <org> --yes [--from client:scope]...
-                                        Delete an org's profile + token, optionally strip client entries
-  debug <org>                          Run diagnostics when something isn't working
-
-Security note: this tool never accepts a token as a command-line argument
-and never prints one. secret-set/rotate require a real interactive TTY.
-EOF
+  wfw_banner
+  echo
+  echo "${WFW_C_DIM}USAGE${WFW_C_RESET}"
+  echo "  webflow-workspaces <command> [args]"
+  echo
+  echo "${WFW_C_DIM}ONBOARDING${WFW_C_RESET}"
+  wfw_cmd_line "connect" "<org> [--label NAME] — add a client via browser, no setup needed (recommended)"
+  wfw_cmd_line "add" "<org> [--label NAME] — register org metadata only"
+  wfw_cmd_line "secret-set" "<org> — paste a token manually (headless fallback)"
+  wfw_cmd_line "rotate" "<org> — replace a stored token"
+  echo
+  echo "${WFW_C_DIM}DAILY USE${WFW_C_RESET}"
+  wfw_cmd_line "list" "list registered orgs + last test status"
+  wfw_cmd_line "inspect" "<org> [--live] — show profile detail"
+  wfw_cmd_line "test" "<org> — validate the stored credentials"
+  wfw_cmd_line "install" "<org> <client> [--scope user|project] [--force]"
+  printf "  %-11s %s\n" "" "client: claude-code | claude-desktop | cursor"
+  wfw_cmd_line "remove" "<org> --yes [--from client:scope]... — delete profile + credentials"
+  wfw_cmd_line "debug" "<org> — diagnose a broken connection"
+  wfw_cmd_line "rename" "<old-org> <new-org> — no re-login needed"
+  echo
+  echo "${WFW_C_DIM}security · this tool never accepts a token as a command-line argument and${WFW_C_RESET}"
+  echo "${WFW_C_DIM}never prints one. secret-set/rotate require a real interactive TTY; connect${WFW_C_RESET}"
+  echo "${WFW_C_DIM}opens a real browser (via mcp-remote, Webflow's own OAuth — no app to set up).${WFW_C_RESET}"
 }
 
 cmd="${1:-}"
@@ -41,7 +58,7 @@ cmd="${1:-}"
 shift || true
 
 case "$cmd" in
-  add|list|inspect|test|install|remove|rotate|debug|secret-set)
+  add|list|inspect|test|install|remove|rotate|debug|secret-set|connect|rename)
     # shellcheck disable=SC1090
     source "$WFW_COMMANDS_DIR/$cmd.sh" "$@"
     ;;

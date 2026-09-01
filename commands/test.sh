@@ -1,23 +1,84 @@
 #!/usr/bin/env bash
-# Usage: webflow-workspaces test <org>
-# Validates the stored token against the real Webflow API. The token is
-# read into a local variable and used only in an Authorization header —
-# it is never echoed, logged, or included in any error message.
+# Usage: webflow-workspaces test <org> [--json]
+# Validates the stored credentials. For "pat" orgs, the token is read into
+# a local variable and used only in an Authorization header — it is never
+# echoed, logged, or included in any error message. For "mcp-remote" orgs
+# we deliberately don't make a live call here (it could trigger mcp-remote
+# to silently pop open a browser if the session needs re-auth) — we just
+# check that a completed session exists on disk.
+# JSON automatically when stdout isn't a real TTY (e.g. an agent's tool call).
 
 source "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/../lib/bootstrap.sh"
 
-org="${1:?Usage: webflow-workspaces test <org>}"
-wfw_require_curl
+org="${1:?Usage: webflow-workspaces test <org> [--json]}"
+shift || true
+json_flag=""
+[[ "${1:-}" == "--json" ]] && json_flag="1"
 
 wfw_profile_exists "$org" || {
-  echo "error: no org '$org' registered" >&2
+  if wfw_json_mode "$json_flag"; then
+    jq -nc --arg org "$org" '{org: $org, status: "fail", error: "org not registered"}'
+  else
+    wfw_say_err "no org '$org' registered"
+  fi
   exit 1
 }
 
-wfw_token="$(wfw_secret_get "$org")"
+auth_method="$(jq -r '.auth_method // "pat"' <<<"$(wfw_profile_read "$org")")"
+
+# wfw_test_emit <status> <hint> — final output in whichever mode was requested.
+wfw_test_emit() {
+  local status="$1" hint="${2:-}"
+  if wfw_json_mode "$json_flag"; then
+    jq -nc \
+      --arg org "$org" --arg auth "$auth_method" --arg status "$status" \
+      --arg error "$err_msg" --argjson scopes "${scopes_json:-[]}" \
+      --argjson sites "${sites_count:-null}" \
+      '{org: $org, auth_method: $auth, status: $status,
+        sites_count: $sites, scopes: $scopes,
+        error: (if $error == "" then null else $error end)}'
+  else
+    if [[ "$status" == "ok" ]]; then
+      if [[ "$auth_method" == "mcp-remote" ]]; then
+        wfw_say_ok "'$org' has a saved Webflow session (mcp-remote)"
+        echo "${WFW_C_DIM}note: this only checks a session was saved, not that it's still valid —${WFW_C_RESET}"
+        echo "${WFW_C_DIM}a real client (Claude Code/Cursor/Claude Desktop) will refresh or${WFW_C_RESET}"
+        echo "${WFW_C_DIM}re-prompt automatically the next time it connects.${WFW_C_RESET}"
+      else
+        wfw_say_ok "token for '$org' is valid · sites accessible: $sites_count"
+        [[ "$scopes_json" != "[]" ]] && echo "${WFW_C_DIM}scopes: $(jq -r 'join(", ")' <<<"$scopes_json")${WFW_C_RESET}"
+      fi
+    else
+      wfw_say_err "$err_msg"
+      [[ -n "$hint" ]] && wfw_say_hint "$hint"
+    fi
+  fi
+}
+
+err_msg="" scopes_json="[]" sites_count="null"
+
+if [[ "$auth_method" == "mcp-remote" ]]; then
+  if wfw_mcp_remote_connected "$org"; then
+    wfw_profile_update_last_test "$org" "ok" "[]" "null" ""
+    wfw_audit_log "test" "$org" "ok" "mcp-remote session present"
+    wfw_test_emit "ok"
+    exit 0
+  else
+    err_msg="no mcp-remote session found"
+    wfw_profile_update_last_test "$org" "fail" "[]" "null" "$err_msg"
+    wfw_audit_log "test" "$org" "fail" "$err_msg"
+    wfw_test_emit "fail" "run 'webflow-workspaces connect $org' to log in"
+    exit 1
+  fi
+fi
+
+wfw_require_curl
+
+wfw_token="$(wfw_secret_get "$org" || true)"
 if [[ -z "$wfw_token" ]]; then
-  echo "error: no token stored for '$org' — run 'webflow-workspaces secret-set $org'" >&2
-  wfw_profile_update_last_test "$org" "fail" "[]" "null" "no token stored"
+  err_msg="no token stored"
+  wfw_profile_update_last_test "$org" "fail" "[]" "null" "$err_msg"
+  wfw_test_emit "fail" "run 'webflow-workspaces secret-set $org'"
   exit 1
 fi
 
@@ -32,7 +93,6 @@ http_code="$(curl -s -o "$body_file" -w "%{http_code}" \
 if [[ "$http_code" == "200" ]]; then
   sites_count="$(jq '.sites | length' "$body_file" 2>/dev/null || echo 0)"
 
-  scopes_json="[]"
   auth_body_file="$(mktemp)"
   auth_code="$(curl -s -o "$auth_body_file" -w "%{http_code}" \
     -H "Authorization: Bearer $wfw_token" \
@@ -45,21 +105,19 @@ if [[ "$http_code" == "200" ]]; then
 
   wfw_profile_update_last_test "$org" "ok" "$scopes_json" "$sites_count" ""
   wfw_audit_log "test" "$org" "ok" "sites=$sites_count"
-  echo "OK: token for '$org' is valid. Sites accessible: $sites_count."
-  if [[ "$scopes_json" != "[]" ]]; then
-    echo "Scopes: $(jq -r 'join(", ")' <<<"$scopes_json")"
-  fi
+  wfw_test_emit "ok"
 else
   err_msg="HTTP $http_code"
   detail="$(jq -r '.message // empty' "$body_file" 2>/dev/null || true)"
   [[ -n "$detail" ]] && err_msg="$err_msg: $detail"
   wfw_profile_update_last_test "$org" "fail" "[]" "null" "$err_msg"
   wfw_audit_log "test" "$org" "fail" "$err_msg"
-  echo "FAIL: $err_msg" >&2
+  hint=""
   case "$http_code" in
-    401) echo "hint: token is invalid, revoked, or expired — try 'webflow-workspaces rotate $org'" >&2 ;;
-    403) echo "hint: token is valid but lacks required scopes for this site/workspace" >&2 ;;
-    000) echo "hint: no response — check network connectivity / DNS / proxy" >&2 ;;
+    401) hint="token is invalid, revoked, or expired — try 'webflow-workspaces rotate $org'" ;;
+    403) hint="token is valid but lacks required scopes for this site/workspace" ;;
+    000) hint="no response — check network connectivity / DNS / proxy" ;;
   esac
+  wfw_test_emit "fail" "$hint"
   exit 1
 fi

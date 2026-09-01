@@ -5,20 +5,29 @@
 wfw_profile_exists() { [[ -f "$(wfw_profile_path "$1")" ]]; }
 
 wfw_profile_write_new() {
-  local org="$1" label="$2" backend
+  local org="$1" label="$2" auth_method="${3:-pat}" backend
   backend="$(wfw_secret_backend)"
   jq -n \
     --arg org "$org" \
     --arg label "$label" \
     --arg created_at "$(wfw_now)" \
     --arg backend "$backend" \
+    --arg auth_method "$auth_method" \
     '{
       org: $org,
       label: $label,
       created_at: $created_at,
       secret_backend: $backend,
+      auth_method: $auth_method,
       last_test: { timestamp: null, status: null, scopes: [], sites_count: null, error: null }
     }' > "$(wfw_profile_path "$org")"
+}
+
+wfw_profile_set_auth_method() {
+  local org="$1" auth_method="$2" p tmp
+  p="$(wfw_profile_path "$org")"
+  tmp="$(mktemp)"
+  jq --arg m "$auth_method" '.auth_method = $m' "$p" > "$tmp" && mv "$tmp" "$p"
 }
 
 wfw_profile_read() { cat "$(wfw_profile_path "$1")"; }

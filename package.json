@@ -1,0 +1,48 @@
+{
+  "name": "@fiorellacisneros/webflow-workspaces",
+  "version": "0.1.0",
+  "description": "Manage multiple Webflow MCP server connections (one per client/org) without ever letting an API token pass through agent context.",
+  "license": "MIT",
+  "bin": {
+    "webflow-workspaces": "bin/webflow-workspaces",
+    "ww": "bin/webflow-workspaces"
+  },
+  "files": [
+    "bin",
+    "commands",
+    "lib",
+    "SKILL.md",
+    "README.md",
+    "LICENSE"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "os": [
+    "darwin",
+    "linux"
+  ],
+  "keywords": [
+    "webflow",
+    "mcp",
+    "model-context-protocol",
+    "claude-code",
+    "claude-desktop",
+    "cursor",
+    "cli",
+    "skill",
+    "agency",
+    "keychain"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/fiorellacisneros/webflow-workspaces.git"
+  },
+  "homepage": "https://github.com/fiorellacisneros/webflow-workspaces#readme",
+  "bugs": {
+    "url": "https://github.com/fiorellacisneros/webflow-workspaces/issues"
+  }
+}

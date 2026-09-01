@@ -17,7 +17,7 @@ source "$SCRIPT_DIR/../lib/secrets.sh"
 
 org="${1:?Usage: run-mcp.sh <org>}"
 
-WEBFLOW_TOKEN="$(wfw_secret_get "$org")"
+WEBFLOW_TOKEN="$(wfw_secret_get "$org" || true)"
 if [[ -z "$WEBFLOW_TOKEN" ]]; then
   echo "webflow-workspaces: no token stored for org '$org'. Run 'webflow-workspaces secret-set $org'." >&2
   exit 1

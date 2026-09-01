@@ -82,6 +82,22 @@ wfw_client_merge_server() {
     "$config_path" > "$tmp" && mv "$tmp" "$config_path"
 }
 
+# wfw_build_server_json <org> <auth_method> — the mcpServers entry for an
+# org, shared by install.sh and rename.sh so both stay in sync.
+wfw_build_server_json() {
+  local org="$1" auth_method="$2"
+  if [[ "$auth_method" == "mcp-remote" ]]; then
+    local remote_dir
+    remote_dir="$(wfw_mcp_remote_dir "$org")"
+    jq -n --arg url "$WFW_MCP_URL" --arg dir "$remote_dir" \
+      '{command: "npx", args: ["-y", "mcp-remote", $url, "--resource", $url], env: {MCP_REMOTE_CONFIG_DIR: $dir}}'
+  else
+    local run_mcp_path="$WFW_COMMANDS_DIR/run-mcp.sh"
+    chmod +x "$run_mcp_path" 2>/dev/null || true
+    jq -n --arg cmd "$run_mcp_path" --arg org "$org" '{command: $cmd, args: [$org]}'
+  fi
+}
+
 wfw_client_remove_server() {
   local config_path="$1" server_name="$2" tmp
   [[ -f "$config_path" ]] || return 0

@@ -17,12 +17,12 @@ while [[ $# -gt 0 ]]; do
 done
 
 wfw_valid_org "$org" || {
-  echo "error: org name must be lowercase alphanumeric with - or _ (got '$org')" >&2
+  wfw_say_err "org name must be lowercase alphanumeric with - or _ (got '$org')"
   exit 1
 }
 
 if wfw_profile_exists "$org"; then
-  echo "error: org '$org' already exists (use 'rotate' to change its token, or 'remove' first)" >&2
+  wfw_say_err "org '$org' already exists (use 'rotate' to change its token, or 'remove' first)"
   exit 1
 fi
 
@@ -30,12 +30,12 @@ wfw_profile_write_new "$org" "$label"
 wfw_audit_log "add" "$org" "ok"
 
 backend="$(wfw_secret_backend)"
-echo "Registered org '$org' (label: $label). Secret backend: $backend."
+wfw_say_ok "registered org '$org' (label: $label) · secret backend: $backend"
 echo
-echo "Next step — run this yourself, in your own terminal (not through an agent):"
+wfw_say_next "run this yourself, in your own terminal (not through an agent):"
 echo
 echo "    webflow-workspaces secret-set $org"
 echo
-echo "It will prompt for the Webflow API token with hidden input and store it"
+echo "${WFW_C_DIM}It will prompt for the Webflow API token with hidden input and store it"
 echo "directly in $backend. The token is never passed as a command argument"
-echo "and never printed."
+echo "and never printed.${WFW_C_RESET}"
