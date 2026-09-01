@@ -13,7 +13,10 @@
     "lib",
     "SKILL.md",
     "README.md",
-    "LICENSE"
+    "LICENSE",
+    "CONTRIBUTING.md",
+    "friction.md",
+    "cases"
   ],
   "publishConfig": {
     "access": "public"
