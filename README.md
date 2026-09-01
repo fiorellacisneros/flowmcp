@@ -4,8 +4,6 @@ Manage multiple [`webflow-mcp-server`](https://www.npmjs.com/package/webflow-mcp
 connections — one per client — without ever letting a Webflow API token pass
 through an AI agent's context.
 
-Built [by human, for human](https://www.forhuman.studio/).
-
 ## Why
 
 If you run an agency, you need one Webflow API token per client workspace
@@ -228,4 +226,4 @@ MIT — see [LICENSE](LICENSE).
 
 ---
 
-Built [by human, for human](https://www.forhuman.studio/).
+Built by human, [forhuman](https://www.forhuman.studio/).
