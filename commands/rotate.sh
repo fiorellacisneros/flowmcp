@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
-# Usage: webflow-workspaces rotate <org>
+# Usage: flowmcp rotate <org>
 # Same interactive, human-only flow as secret-set — overwrites the existing
 # token for an org that's already registered.
 
 source "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/../lib/bootstrap.sh"
 
-org="${1:?Usage: webflow-workspaces rotate <org>}"
+org="${1:?Usage: flowmcp rotate <org>}"
 
 wfw_profile_exists "$org" || {
   echo "error: no org '$org' registered" >&2
@@ -30,4 +30,4 @@ wfw_secret_set "$org" wfw_token_input
 wfw_audit_log "rotate" "$org" "ok"
 
 echo "Rotated token for '$org' via $(wfw_secret_backend)."
-echo "Run 'webflow-workspaces test $org' to verify the new token works."
+echo "Run 'flowmcp test $org' to verify the new token works."

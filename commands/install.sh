@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Usage: webflow-workspaces install <org> <client> [--scope user|project] [--force] [--dry-run] [--json]
+# Usage: flowmcp install <org> <client> [--scope user|project] [--force] [--dry-run] [--json]
 # client: claude-code | claude-desktop | cursor
 #
 # Writes an mcpServers entry that points at run-mcp.sh, so the token itself
@@ -7,8 +7,8 @@
 
 source "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/../lib/bootstrap.sh"
 
-org="${1:?Usage: webflow-workspaces install <org> <client> [--scope user|project] [--force] [--dry-run]}"
-client="${2:?Usage: webflow-workspaces install <org> <client> [--scope user|project] [--force] [--dry-run]}"
+org="${1:?Usage: flowmcp install <org> <client> [--scope user|project] [--force] [--dry-run]}"
+client="${2:?Usage: flowmcp install <org> <client> [--scope user|project] [--force] [--dry-run]}"
 shift 2
 scope="user"
 force=""
@@ -25,7 +25,7 @@ while [[ $# -gt 0 ]]; do
 done
 
 wfw_profile_exists "$org" || {
-  wfw_say_err "no org '$org' registered — run 'webflow-workspaces add $org' or 'connect $org' first"
+  wfw_say_err "no org '$org' registered — run 'flowmcp add $org' or 'connect $org' first"
   exit 1
 }
 
@@ -45,7 +45,7 @@ if [[ -n "$dry_run" ]]; then
     jq -nc --arg org "$org" --arg client "$client" --arg scope "$scope" --arg path "$config_path" \
       --arg name "$server_name" --argjson entry "$server_json" \
       '{ok: true, dry_run: true, org: $org, client: $client, scope: $scope, path: $path,
-        server_name: $name, entry: $entry, next_steps: ["webflow-workspaces install \($org) \($client) --scope \($scope)"]}'
+        server_name: $name, entry: $entry, next_steps: ["flowmcp install \($org) \($client) --scope \($scope)"]}'
   else
     echo "${WFW_C_DIM}dry-run — would merge into $config_path:${WFW_C_RESET}"
     jq -n --arg name "$server_name" --argjson entry "$server_json" '{mcpServers: {($name): $entry}}'
@@ -60,7 +60,7 @@ if wfw_json_mode "$json_flag"; then
   jq -nc --arg org "$org" --arg client "$client" --arg scope "$scope" --arg path "$config_path" \
     --arg name "$server_name" \
     '{ok: true, dry_run: false, org: $org, client: $client, scope: $scope, path: $path, server_name: $name,
-      next_steps: ["restart \($client) to pick up the new server", "webflow-workspaces test \($org)"]}'
+      next_steps: ["restart \($client) to pick up the new server", "flowmcp test \($org)"]}'
 else
   wfw_say_ok "installed '$server_name' into $config_path"
   echo "${WFW_C_DIM}($note — restart $client to pick it up)${WFW_C_RESET}"

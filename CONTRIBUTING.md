@@ -1,11 +1,11 @@
-# Contributing to webflow-workspaces
+# Contributing to flowmcp
 
-Thanks for helping improve webflow-workspaces.
+Thanks for helping improve flowmcp.
 
 ## Layout
 
 ```
-bin/webflow-workspaces   dispatcher — resolves symlinks, sources lib/bootstrap.sh, routes to commands/
+bin/flowmcp   dispatcher — resolves symlinks, sources lib/bootstrap.sh, routes to commands/
 lib/                     shared functions: paths, secrets, profiles, client-config merge, audit log, UI
 commands/                one script per verb, self-bootstrapping (works sourced or run standalone)
 ```
@@ -32,12 +32,12 @@ doesn't get merged, no exceptions.
 Requires `bash`, `jq`, `curl`, and Node/`npx`.
 
 ```bash
-npm link          # or: ln -s "$(pwd)/bin/webflow-workspaces" /usr/local/bin/webflow-workspaces
-webflow-workspaces --help
+npm link          # or: ln -s "$(pwd)/bin/flowmcp" /usr/local/bin/flowmcp
+flowmcp --help
 ```
 
-Link it globally before calling anything done — running `bash bin/webflow-workspaces`
-directly skips the symlink-resolution path (`bin/webflow-workspaces`'s
+Link it globally before calling anything done — running `bash bin/flowmcp`
+directly skips the symlink-resolution path (`bin/flowmcp`'s
 `while [ -h "$SOURCE" ]` loop) and the `bin` field a real install goes
 through, so it verifies less than it looks like it does.
 
@@ -50,7 +50,7 @@ environment:
 export WFW_HOME=/tmp/wfw-test-$$
 export HOME=/tmp/wfw-test-home-$$
 mkdir -p "$HOME"
-webflow-workspaces add zzz-test-1 --label "Test Co"
+flowmcp add zzz-test-1 --label "Test Co"
 # ... exercise the command you changed ...
 rm -rf "$WFW_HOME" "$HOME"
 ```
@@ -71,7 +71,7 @@ paths in every command that has them.
 ## Adding a command
 
 1. Add `commands/<verb>.sh`, self-bootstrapping as above.
-2. Add it to the whitelist `case` in `bin/webflow-workspaces` and to
+2. Add it to the whitelist `case` in `bin/flowmcp` and to
    `usage()`.
 3. Add it to `commands/schema.sh` — usage, whether it mutates, whether it
    requires a TTY, whether it's destructive, and its JSON output shape.

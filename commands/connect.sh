@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Usage: webflow-workspaces connect <org> [--label "Name"]
+# Usage: flowmcp connect <org> [--label "Name"]
 #
 # Human-friendly alternative to add + secret-set: opens a browser, the
 # client logs into their own Webflow account and approves access, and the
@@ -15,7 +15,7 @@
 source "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/../lib/bootstrap.sh"
 wfw_require_npx
 
-org="${1:?Usage: webflow-workspaces connect <org> [--label \"Name\"]}"
+org="${1:?Usage: flowmcp connect <org> [--label \"Name\"]}"
 shift || true
 label="$org"
 while [[ $# -gt 0 ]]; do
@@ -52,10 +52,10 @@ if wfw_mcp_remote_connected "$org"; then
   wfw_profile_set_auth_method "$org" "mcp-remote"
   wfw_audit_log "connect" "$org" "ok"
   wfw_say_ok "connected '$org' via Webflow's OAuth"
-  wfw_say_next "webflow-workspaces test $org — or 'install $org <client>' to wire it up"
+  wfw_say_next "flowmcp test $org — or 'install $org <client>' to wire it up"
 else
   wfw_audit_log "connect" "$org" "fail" "no completed session found"
   wfw_say_err "no completed session found for '$org' — the login may not have finished"
-  wfw_say_hint "run 'webflow-workspaces connect $org' again and wait until it shows connected"
+  wfw_say_hint "run 'flowmcp connect $org' again and wait until it shows connected"
   exit 1
 fi

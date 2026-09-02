@@ -1,17 +1,17 @@
 ---
-name: webflow-workspaces
+name: flowmcp
 description: Manage multiple Webflow MCP server connections (one per client/org — e.g. an agency's own workspace plus each customer's) without ever letting an API token pass through agent context. Use when the user wants to add, list, inspect, test, install, rotate, remove, or debug a Webflow MCP connection, or asks to set up webflow-mcp-server for a new client, or reports an MCP connection to Webflow that isn't working.
 license: MIT
 ---
 
-# webflow-workspaces
+# flowmcp
 
-A CLI (`bin/webflow-workspaces`) for managing one `webflow-mcp-server` connection
+A CLI (`bin/flowmcp`) for managing one `webflow-mcp-server` connection
 per client/org, so an agency can hold separate Webflow API tokens for its own
 workspace and for each customer's workspace at once — installed into Claude
 Code, Claude Desktop, and/or Cursor.
 
-## Start here: `webflow-workspaces schema`
+## Start here: `flowmcp schema`
 
 Run this once per session instead of parsing `--help`. It returns
 machine-readable JSON: every command's usage, whether it mutates state,
@@ -70,7 +70,7 @@ environments where no browser can be opened.
 ### `connect` (preferred, no setup required)
 
 ```
-webflow-workspaces connect <org> --label "Acme Corp"
+flowmcp connect <org> --label "Acme Corp"
 ```
 
 You can run this yourself, but it needs the user physically present: it
@@ -89,19 +89,19 @@ not driving an interactive session with them watching.
 
 ### PAT path (fallback): `add` + `secret-set`
 
-1. `webflow-workspaces add <org> --label "Acme Corp"` — you can run this.
+1. `flowmcp add <org> --label "Acme Corp"` — you can run this.
    Registers profile metadata only.
 2. Tell the user, verbatim, to run in their own terminal:
-   `webflow-workspaces secret-set <org>`
+   `flowmcp secret-set <org>`
    Do not run this yourself. Do not ask them to paste the token into chat.
 
 ### Then, either path:
 
-3. Verify with `webflow-workspaces test <org>` — you can run this; it hits
+3. Verify with `flowmcp test <org>` — you can run this; it hits
    the real Webflow API and reports back scopes/site count without ever
    printing the token.
 4. Install into whichever client(s) the user wants:
-   `webflow-workspaces install <org> claude-code --scope project`
+   `flowmcp install <org> claude-code --scope project`
    (or `claude-desktop` / `cursor`, `--scope user`). This merges into the
    existing config — it will not clobber other MCP servers already there,
    and refuses to overwrite an existing `webflow-<org>` entry unless you
@@ -110,7 +110,7 @@ not driving an interactive session with them watching.
 
 ## Workflow: something's not connecting
 
-Run `webflow-workspaces debug <org>`. It branches on the org's
+Run `flowmcp debug <org>`. It branches on the org's
 `auth_method` (`mcp-remote` or `pat`) and checks the right things for each:
 profile exists, credentials exist (session file or keychain), the relevant
 npm package (`mcp-remote` or `webflow-mcp-server`) is resolvable, a
@@ -121,12 +121,12 @@ to relay verbatim.
 
 Common causes:
 - `mcp-remote` orgs: no saved session → tell the user to run
-  `webflow-workspaces connect <org>` themselves. `test`/`debug` only check
+  `flowmcp connect <org>` themselves. `test`/`debug` only check
   that a session was *saved*, not that it's still valid — an expired
   session refreshes or re-prompts automatically the next time a real
   client connects, so don't over-interpret an "ok" here as a guarantee.
 - `pat` orgs: HTTP 401 → token invalid/revoked/expired → tell user to run
-  `webflow-workspaces rotate <org>` themselves. HTTP 403 → token valid but
+  `flowmcp rotate <org>` themselves. HTTP 403 → token valid but
   missing scopes. HTTP 000 → network/DNS/proxy issue, not a token problem.
 - client config exists but has no `webflow-<org>` entry → `install` wasn't
   run yet, or was run against a different scope/client than the user
@@ -134,11 +134,11 @@ Common causes:
 
 ## Workflow: removing or rotating a client
 
-- Rotate: PAT orgs — tell the user to run `webflow-workspaces rotate <org>`
+- Rotate: PAT orgs — tell the user to run `flowmcp rotate <org>`
   themselves, same TTY-only rule as `secret-set`. `mcp-remote` orgs don't
   need manual rotation — just re-run `connect <org>`, which overwrites the
   saved session.
-- Remove: `webflow-workspaces remove <org> --yes [--from client:scope]...`
+- Remove: `flowmcp remove <org> --yes [--from client:scope]...`
   is destructive (deletes the profile and the stored credentials — token
   or saved session, whichever applies) — confirm with the user before
   running it, and pass `--from claude-code:project` etc. for each client
@@ -147,19 +147,19 @@ Common causes:
 ## Command reference
 
 ```
-webflow-workspaces add <org> [--label "Name"]
-webflow-workspaces secret-set <org>                 # human-only, TTY required
-webflow-workspaces rotate <org>                     # human-only, TTY required
-webflow-workspaces connect <org> [--label "Name"]   # opens a browser, needs the user present
-webflow-workspaces list [--json]
-webflow-workspaces inspect <org> [--live] [--json]
-webflow-workspaces test <org> [--json]
-webflow-workspaces install <org> <client> [--scope user|project] [--force] [--dry-run] [--json]
+flowmcp add <org> [--label "Name"]
+flowmcp secret-set <org>                 # human-only, TTY required
+flowmcp rotate <org>                     # human-only, TTY required
+flowmcp connect <org> [--label "Name"]   # opens a browser, needs the user present
+flowmcp list [--json]
+flowmcp inspect <org> [--live] [--json]
+flowmcp test <org> [--json]
+flowmcp install <org> <client> [--scope user|project] [--force] [--dry-run] [--json]
                                                      # client: claude-code | claude-desktop | cursor
-webflow-workspaces remove <org> --yes [--from client:scope]... [--dry-run] [--json]
-webflow-workspaces rename <old-org> <new-org> [--dry-run] [--json]
-webflow-workspaces debug <org> [--json]
-webflow-workspaces schema                           # always JSON — run this first
+flowmcp remove <org> --yes [--from client:scope]... [--dry-run] [--json]
+flowmcp rename <old-org> <new-org> [--dry-run] [--json]
+flowmcp debug <org> [--json]
+flowmcp schema                           # always JSON — run this first
 ```
 
 `--json` is implicit whenever stdout isn't a TTY, so you (the agent) get it by
@@ -169,20 +169,20 @@ run by an agent at session start.
 
 ## Storage layout (for context, not something you normally touch directly)
 
-- `~/.webflow-workspaces/profiles/<org>.json` — non-sensitive metadata only
+- `~/.flowmcp/profiles/<org>.json` — non-sensitive metadata only
   (label, created_at, `auth_method`, secret backend, last test
   result/scopes/error). Safe to `jq`/`cat`/show the user in full.
-- `mcp-remote` orgs: `~/.webflow-workspaces/mcp-remote/<org>/` — an
+- `mcp-remote` orgs: `~/.flowmcp/mcp-remote/<org>/` — an
   isolated `MCP_REMOTE_CONFIG_DIR` per org, owned and read entirely by the
   third-party `mcp-remote` tool. We only ever check whether a `*_tokens.json`
   file exists in there (`wfw_mcp_remote_connected`) — never read its
   contents.
 - `pat` orgs: OS keychain first (`security` on macOS, `secret-tool`/libsecret
-  on Linux), falling back to `~/.webflow-workspaces/secrets/<org>.token` at
+  on Linux), falling back to `~/.flowmcp/secrets/<org>.token` at
   `chmod 600` only when no keychain is available (e.g. a headless
   container). Never read this file directly — always go through `test`,
   `inspect`, or `debug`, which are designed not to leak it.
-- `~/.webflow-workspaces/audit/<YYYY-MM>.jsonl` — append-only log of actions
+- `~/.flowmcp/audit/<YYYY-MM>.jsonl` — append-only log of actions
   with timestamps and results, never credential values. Useful if the user
   asks "when did we last touch the Acme connection."
 

@@ -113,9 +113,9 @@ wfw_wait_with_logo() {
 wfw_banner() {
   if [[ -n "$WFW_C_RESET" ]]; then
     wfw_logo
-    echo "${WFW_C_BOLD}webflow-workspaces${WFW_C_RESET}  ${WFW_C_DIM}v$(wfw_version)${WFW_C_RESET}  ${WFW_C_YELLOW}·${WFW_C_RESET} ${WFW_C_CYAN}by forhuman${WFW_C_RESET}"
+    echo "${WFW_C_BOLD}flowmcp${WFW_C_RESET}  ${WFW_C_DIM}v$(wfw_version)${WFW_C_RESET}  ${WFW_C_YELLOW}·${WFW_C_RESET} ${WFW_C_CYAN}by forhuman${WFW_C_RESET}"
   else
-    echo "webflow-workspaces v$(wfw_version) · by forhuman"
+    echo "flowmcp v$(wfw_version) · by forhuman"
   fi
   echo "${WFW_C_DIM}agent-safe Webflow MCP connection manager${WFW_C_RESET}"
 }

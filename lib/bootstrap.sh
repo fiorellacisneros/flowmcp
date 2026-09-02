@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Idempotent loader: makes every command script work whether it's
-# `source`d by bin/webflow-workspaces (functions already in-process) or
+# `source`d by bin/flowmcp (functions already in-process) or
 # executed as its own subprocess (e.g. debug.sh shelling out to test.sh).
 BOOTSTRAP_LIB_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 : "${WFW_LIB_DIR:=$BOOTSTRAP_LIB_DIR}"

@@ -1,12 +1,12 @@
 #!/usr/bin/env bash
-# Usage: webflow-workspaces remove <org> --yes [--from client:scope ...] [--dry-run] [--json]
+# Usage: flowmcp remove <org> --yes [--from client:scope ...] [--dry-run] [--json]
 # Destructive: deletes the profile and the stored secret. Requires --yes.
 # Optionally also strips the entry from named client configs, e.g.:
-#   webflow-workspaces remove acme --yes --from claude-code:user --from cursor:project
+#   flowmcp remove acme --yes --from claude-code:user --from cursor:project
 
 source "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/../lib/bootstrap.sh"
 
-org="${1:?Usage: webflow-workspaces remove <org> --yes [--from client:scope]... [--dry-run]}"
+org="${1:?Usage: flowmcp remove <org> --yes [--from client:scope]... [--dry-run]}"
 shift || true
 confirmed=""
 dry_run=""
@@ -47,7 +47,7 @@ fi
 
 if [[ -z "$confirmed" ]]; then
   if wfw_json_mode "$json_flag"; then
-    jq -nc --arg org "$org" '{ok: false, error: "confirmation required", next_steps: ["webflow-workspaces remove \($org) --yes"]}'
+    jq -nc --arg org "$org" '{ok: false, error: "confirmation required", next_steps: ["flowmcp remove \($org) --yes"]}'
   else
     wfw_say_err "this deletes the profile and the stored token for '$org'."
     wfw_say_hint "re-run with --yes to confirm"

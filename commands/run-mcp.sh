@@ -19,7 +19,7 @@ org="${1:?Usage: run-mcp.sh <org>}"
 
 WEBFLOW_TOKEN="$(wfw_secret_get "$org" || true)"
 if [[ -z "$WEBFLOW_TOKEN" ]]; then
-  echo "webflow-workspaces: no token stored for org '$org'. Run 'webflow-workspaces secret-set $org'." >&2
+  echo "flowmcp: no token stored for org '$org'. Run 'flowmcp secret-set $org'." >&2
   exit 1
 fi
 export WEBFLOW_TOKEN

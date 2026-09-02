@@ -1,12 +1,12 @@
-# case: webflow-workspaces
+# case: flowmcp
 
-**Target:** `webflow-workspaces` itself (own repo, not a wrapped third party
+**Target:** `flowmcp` itself (own repo, not a wrapped third party
 in the sense the rest of this file means it — see "contract origin" below).
 **Terrain:** mixed — a defined local contract (profiles, secrets, client
 config entries) plus a discovered remote one (Webflow's hosted MCP server
 OAuth surface).
-**Distribution:** npm (`@forhuman/webflow-workspaces`), bash + Node/`npx`
-runtime, `bin` aliases `webflow-workspaces` and `ww`. Chosen because the
+**Distribution:** npm (`@forhuman/flowmcp`), bash + Node/`npx`
+runtime, `bin` aliases `flowmcp` and `fmcp`. Chosen because the
 audience is JS-ecosystem developers/agencies already running Node for
 `npx mcp-remote` / `npx webflow-mcp-server` anyway — a compiled binary would
 have added packaging cost with no reachability gain for this audience.
@@ -63,7 +63,7 @@ folded in below.
   and `remove` requires `--yes` with no interactive fallback. `add`/`connect`/
   `list`/`inspect`/`test`/`debug` earn no gate: worst case is a wasted API
   call or a duplicate profile you can `remove`.
-- Audit log: append-only, `~/.webflow-workspaces/audit/<YYYY-MM>.jsonl`,
+- Audit log: append-only, `~/.flowmcp/audit/<YYYY-MM>.jsonl`,
   written after the action completes (not two-phase pending/final) since
   none of the mutating commands here are async or long-running enough for a
   killed-mid-flight state to matter the way it would for a payment API.

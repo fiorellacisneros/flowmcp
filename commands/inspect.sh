@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
-# Usage: webflow-workspaces inspect <org> [--live] [--json]
+# Usage: flowmcp inspect <org> [--live] [--json]
 # Prints full profile metadata (no token). Add --live to also re-run test.
 # JSON automatically when stdout isn't a real TTY (e.g. an agent's tool call).
 
 source "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/../lib/bootstrap.sh"
 
-org="${1:?Usage: webflow-workspaces inspect <org> [--live] [--json]}"
+org="${1:?Usage: flowmcp inspect <org> [--live] [--json]}"
 shift || true
 live="" json_flag=""
 while [[ $# -gt 0 ]]; do
@@ -35,12 +35,12 @@ fi
 if wfw_json_mode "$json_flag"; then
   if [[ "$connected" == "false" ]]; then
     if [[ "$auth_method" == "mcp-remote" ]]; then
-      next="[\"webflow-workspaces connect $org\"]"
+      next="[\"flowmcp connect $org\"]"
     else
-      next="[\"webflow-workspaces secret-set $org\"]"
+      next="[\"flowmcp secret-set $org\"]"
     fi
   else
-    next="[\"webflow-workspaces test $org\"]"
+    next="[\"flowmcp test $org\"]"
   fi
   jq --argjson connected "$connected" --argjson next "$next" \
     '. + {connected: $connected, next_steps: $next}' "$(wfw_profile_path "$org")"
@@ -51,8 +51,8 @@ jq . "$(wfw_profile_path "$org")"
 echo
 if [[ "$connected" == "false" ]]; then
   if [[ "$auth_method" == "mcp-remote" ]]; then
-    echo "note: no saved session yet for '$org' — run 'webflow-workspaces connect $org'"
+    echo "note: no saved session yet for '$org' — run 'flowmcp connect $org'"
   else
-    echo "note: no token stored yet for '$org' — run 'webflow-workspaces secret-set $org'"
+    echo "note: no token stored yet for '$org' — run 'flowmcp secret-set $org'"
   fi
 fi

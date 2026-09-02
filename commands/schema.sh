@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
-# Usage: webflow-workspaces schema
+# Usage: flowmcp schema
 # Machine-readable description of every command: args, flags, and the JSON
 # shape it emits in --json mode. Always JSON, regardless of TTY — an agent
-# should be able to `webflow-workspaces schema` once at the start of a
+# should be able to `flowmcp schema` once at the start of a
 # session and know the whole surface without parsing --help text.
 
 source "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/../lib/bootstrap.sh"

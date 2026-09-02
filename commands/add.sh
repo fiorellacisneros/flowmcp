@@ -1,12 +1,12 @@
 #!/usr/bin/env bash
-# Usage: webflow-workspaces add <org> [--label "Display Name"]
+# Usage: flowmcp add <org> [--label "Display Name"]
 # Registers profile metadata only. No token handling here — run
-# `webflow-workspaces secret-set <org>` yourself afterwards, in your own
+# `flowmcp secret-set <org>` yourself afterwards, in your own
 # terminal, to store the token.
 
 source "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/../lib/bootstrap.sh"
 
-org="${1:?Usage: webflow-workspaces add <org> [--label \"Display Name\"]}"
+org="${1:?Usage: flowmcp add <org> [--label \"Display Name\"]}"
 shift || true
 label="$org"
 while [[ $# -gt 0 ]]; do
@@ -34,7 +34,7 @@ wfw_say_ok "registered org '$org' (label: $label) · secret backend: $backend"
 echo
 wfw_say_next "run this yourself, in your own terminal (not through an agent):"
 echo
-echo "    webflow-workspaces secret-set $org"
+echo "    flowmcp secret-set $org"
 echo
 echo "${WFW_C_DIM}It will prompt for the Webflow API token with hidden input and store it"
 echo "directly in $backend. The token is never passed as a command argument"

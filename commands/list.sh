@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Usage: webflow-workspaces list [--json]
+# Usage: flowmcp list [--json]
 # Lists registered orgs and their last test status. Never prints tokens.
 # JSON automatically when stdout isn't a real TTY (e.g. an agent's tool call).
 
@@ -20,7 +20,7 @@ if wfw_json_mode "$json_flag"; then
 fi
 
 if [[ ${#orgs[@]} -eq 0 ]]; then
-  echo "No orgs registered yet. Run 'webflow-workspaces add <org>' to start."
+  echo "No orgs registered yet. Run 'flowmcp add <org>' to start."
   exit 0
 fi
 

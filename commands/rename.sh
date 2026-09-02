@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Usage: webflow-workspaces rename <old-org> <new-org> [--dry-run] [--json]
+# Usage: flowmcp rename <old-org> <new-org> [--dry-run] [--json]
 # Renames an org: moves its profile and saved credentials without any
 # re-authentication, and updates the entry name in any client config where
 # it was already installed (server names are derived from the org name, so
@@ -7,8 +7,8 @@
 
 source "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/../lib/bootstrap.sh"
 
-old="${1:?Usage: webflow-workspaces rename <old-org> <new-org> [--dry-run]}"
-new="${2:?Usage: webflow-workspaces rename <old-org> <new-org> [--dry-run]}"
+old="${1:?Usage: flowmcp rename <old-org> <new-org> [--dry-run]}"
+new="${2:?Usage: flowmcp rename <old-org> <new-org> [--dry-run]}"
 shift 2 || true
 dry_run="" json_flag=""
 while [[ $# -gt 0 ]]; do

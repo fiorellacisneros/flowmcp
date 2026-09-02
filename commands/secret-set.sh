@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Usage: webflow-workspaces secret-set <org>
+# Usage: flowmcp secret-set <org>
 #
 # INTERACTIVE ONLY. This is the one command in this tool that must be run
 # by a human, in their own terminal, never through an agent's tool-call
@@ -8,10 +8,10 @@
 
 source "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/../lib/bootstrap.sh"
 
-org="${1:?Usage: webflow-workspaces secret-set <org>}"
+org="${1:?Usage: flowmcp secret-set <org>}"
 
 wfw_profile_exists "$org" || {
-  echo "error: no org '$org' — run 'webflow-workspaces add $org' first" >&2
+  echo "error: no org '$org' — run 'flowmcp add $org' first" >&2
   exit 1
 }
 
@@ -34,4 +34,4 @@ wfw_secret_set "$org" wfw_token_input
 wfw_audit_log "secret-set" "$org" "ok"
 
 echo "Stored token for '$org' via $(wfw_secret_backend)."
-echo "Run 'webflow-workspaces test $org' to verify it works."
+echo "Run 'flowmcp test $org' to verify it works."

@@ -1,4 +1,4 @@
-# webflow-workspaces
+# flowmcp
 
 Manage multiple [`webflow-mcp-server`](https://www.npmjs.com/package/webflow-mcp-server)
 connections — one per client — without ever letting a Webflow API token pass
@@ -9,10 +9,10 @@ Built [by human, for human](https://www.forhuman.studio/).
 ## Install
 
 ```bash
-npm install -g @forhuman/webflow-workspaces
+npm install -g @forhuman/flowmcp
 ```
 
-Installs both `webflow-workspaces` and the short alias `ww`. Requires
+Installs both `flowmcp` and the short alias `fmcp`. Requires
 `bash`, `jq`, `curl`, and Node/`npx`. On macOS the `security` CLI (ships with
 the OS) is used for keychain access; on Linux install `libsecret-tools`
 (Debian/Ubuntu: `apt install libsecret-tools`) for keychain support, or
@@ -21,11 +21,11 @@ accept the `chmod 600` file fallback.
 ## Quick start
 
 ```bash
-ww connect acme --label "Acme Corp"
+fmcp connect acme --label "Acme Corp"
 # opens your browser -> client approves access -> Ctrl+C once connected -> done
 
-ww test acme
-ww install acme claude-code --scope project
+fmcp test acme
+fmcp install acme claude-code --scope project
 ```
 
 No OAuth App to create, no client ID/secret to manage — `connect` shells out
@@ -35,14 +35,14 @@ No browser available (headless environment)? Use a manually-pasted token
 instead:
 
 ```bash
-ww add acme --label "Acme Corp"
-ww secret-set acme     # run this yourself, in your own terminal — TTY only
-ww test acme
-ww install acme claude-code --scope project
+fmcp add acme --label "Acme Corp"
+fmcp secret-set acme     # run this yourself, in your own terminal — TTY only
+fmcp test acme
+fmcp install acme claude-code --scope project
 # restart the target app to pick up the new MCP server
 ```
 
-Ask `ww schema` for a machine-readable map of every command — usage, JSON
+Ask `fmcp schema` for a machine-readable map of every command — usage, JSON
 shape, whether it mutates, requires a TTY, or is destructive. That's the
 first thing an agent driving this CLI should run.
 
@@ -106,12 +106,12 @@ to preview the change before it's written, and `remove` requires an explicit
 
 ## For agents
 
-Symlink or copy this repo into `.claude/skills/webflow-workspaces/`
-(project-level) or `~/.claude/skills/webflow-workspaces/` (user-level) —
+Symlink or copy this repo into `.claude/skills/flowmcp/`
+(project-level) or `~/.claude/skills/flowmcp/` (user-level) —
 [`SKILL.md`](SKILL.md) at the repo root is the skill definition an agent
-reads. It documents the same JSON contract as `ww schema`, plus the workflow
+reads. It documents the same JSON contract as `fmcp schema`, plus the workflow
 an agent should follow: never call `secret-set`/`rotate` on the user's
-behalf, always check `ww schema` once per session instead of `--help`, and
+behalf, always check `fmcp schema` once per session instead of `--help`, and
 prefer `--dry-run` before any `install`/`remove`/`rename` you're not certain
 about.
 
@@ -125,7 +125,7 @@ For `connect` (`mcp-remote`) orgs, `install` writes:
     "webflow-acme": {
       "command": "npx",
       "args": ["-y", "mcp-remote", "https://mcp.webflow.com/mcp", "--resource", "https://mcp.webflow.com/mcp"],
-      "env": { "MCP_REMOTE_CONFIG_DIR": "/Users/you/.webflow-workspaces/mcp-remote/acme" }
+      "env": { "MCP_REMOTE_CONFIG_DIR": "/Users/you/.flowmcp/mcp-remote/acme" }
     }
   }
 }
@@ -141,7 +141,7 @@ For `secret-set` (PAT) orgs, `install` instead writes:
 {
   "mcpServers": {
     "webflow-acme": {
-      "command": "/path/to/webflow-workspaces/commands/run-mcp.sh",
+      "command": "/path/to/flowmcp/commands/run-mcp.sh",
       "args": ["acme"]
     }
   }
@@ -158,7 +158,7 @@ MCP session.
 ## Storage layout
 
 ```
-~/.webflow-workspaces/
+~/.flowmcp/
   profiles/<org>.json       # metadata only: label, created_at, auth_method, last test result
   mcp-remote/<org>/         # mcp-remote orgs: isolated session storage, owned by mcp-remote itself
   secrets/<org>.token       # pat orgs: chmod 600, ONLY used when no OS keychain is available
@@ -211,7 +211,7 @@ Webflow hardcoded today.
 
 - [SKILL.md](SKILL.md) — the agent-facing manual this CLI ships with
 - [CONTRIBUTING.md](CONTRIBUTING.md) — layout, the one hard rule, how to test safely
-- [cases/webflow-workspaces.md](cases/webflow-workspaces.md) — how this CLI was built, what broke, what got rejected
+- [cases/flowmcp.md](cases/flowmcp.md) — how this CLI was built, what broke, what got rejected
 - Webflow MCP server: https://www.npmjs.com/package/webflow-mcp-server
 - mcp-remote: https://www.npmjs.com/package/mcp-remote
 

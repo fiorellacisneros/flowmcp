@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Usage: webflow-workspaces test <org> [--json]
+# Usage: flowmcp test <org> [--json]
 # Validates the stored credentials. For "pat" orgs, the token is read into
 # a local variable and used only in an Authorization header — it is never
 # echoed, logged, or included in any error message. For "mcp-remote" orgs
@@ -10,7 +10,7 @@
 
 source "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/../lib/bootstrap.sh"
 
-org="${1:?Usage: webflow-workspaces test <org> [--json]}"
+org="${1:?Usage: flowmcp test <org> [--json]}"
 shift || true
 json_flag=""
 [[ "${1:-}" == "--json" ]] && json_flag="1"
@@ -31,7 +31,7 @@ wfw_test_emit() {
   local status="$1" hint="${2:-}"
   if wfw_json_mode "$json_flag"; then
     local next_hint="$hint"
-    [[ "$status" == "ok" ]] && next_hint="webflow-workspaces install $org <client>"
+    [[ "$status" == "ok" ]] && next_hint="flowmcp install $org <client>"
     jq -nc \
       --arg org "$org" --arg auth "$auth_method" --arg status "$status" \
       --arg error "$err_msg" --argjson scopes "${scopes_json:-[]}" \
@@ -70,7 +70,7 @@ if [[ "$auth_method" == "mcp-remote" ]]; then
     err_msg="no mcp-remote session found"
     wfw_profile_update_last_test "$org" "fail" "[]" "null" "$err_msg"
     wfw_audit_log "test" "$org" "fail" "$err_msg"
-    wfw_test_emit "fail" "run 'webflow-workspaces connect $org' to log in"
+    wfw_test_emit "fail" "run 'flowmcp connect $org' to log in"
     exit 1
   fi
 fi
@@ -81,7 +81,7 @@ wfw_token="$(wfw_secret_get "$org" || true)"
 if [[ -z "$wfw_token" ]]; then
   err_msg="no token stored"
   wfw_profile_update_last_test "$org" "fail" "[]" "null" "$err_msg"
-  wfw_test_emit "fail" "run 'webflow-workspaces secret-set $org'"
+  wfw_test_emit "fail" "run 'flowmcp secret-set $org'"
   exit 1
 fi
 
@@ -117,7 +117,7 @@ else
   wfw_audit_log "test" "$org" "fail" "$err_msg"
   hint=""
   case "$http_code" in
-    401) hint="token is invalid, revoked, or expired — try 'webflow-workspaces rotate $org'" ;;
+    401) hint="token is invalid, revoked, or expired — try 'flowmcp rotate $org'" ;;
     403) hint="token is valid but lacks required scopes for this site/workspace" ;;
     000) hint="no response — check network connectivity / DNS / proxy" ;;
   esac

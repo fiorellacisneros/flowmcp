@@ -28,7 +28,7 @@ against it, rather than guessing at Webflow's OAuth behavior from docs.
   out false for the hosted MCP server specifically: `mcp.webflow.com`
   supports Dynamic Client Registration, so `connect` needed zero setup.
   Confirmed by reading the metadata endpoint, not by assumption.
-- **`webflow-workspaces` as a Claude-Code-only tool.** Considered scoping
+- **`flowmcp` as a Claude-Code-only tool.** Considered scoping
   install targets to just `claude-code`. Rejected once it became clear the
   actual pain point (Claude Desktop's native Connector supporting only one
   Webflow account) lives in Claude Desktop, not Claude Code — `install`

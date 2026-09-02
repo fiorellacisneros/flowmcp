@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
-# Usage: webflow-workspaces debug <org> [--json]
+# Usage: flowmcp debug <org> [--json]
 # Runs a battery of non-secret-leaking diagnostics and prints a summary.
 # JSON automatically when stdout isn't a real TTY (e.g. an agent's tool call).
 
 source "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/../lib/bootstrap.sh"
 
-org="${1:?Usage: webflow-workspaces debug <org> [--json]}"
+org="${1:?Usage: flowmcp debug <org> [--json]}"
 shift || true
 json_flag=""
 [[ "${1:-}" == "--json" ]] && json_flag="1"
@@ -30,16 +30,16 @@ wfw_section() {
   wfw_json_mode "$json_flag" || echo "-- $1 --"
 }
 
-wfw_json_mode "$json_flag" || echo "== webflow-workspaces debug: $org =="
+wfw_json_mode "$json_flag" || echo "== flowmcp debug: $org =="
 
 wfw_section "profile"
 if wfw_profile_exists "$org"; then
   wfw_check "profile" "ok" "profile exists at $(wfw_profile_path "$org")"
 else
-  wfw_check "profile" "fail" "no profile registered. Run: webflow-workspaces add $org"
+  wfw_check "profile" "fail" "no profile registered. Run: flowmcp add $org"
   if wfw_json_mode "$json_flag"; then
     jq -nc --arg org "$org" --argjson checks "$(printf '%s\n' "${WFW_CHECKS[@]}" | jq -sc '.')" \
-      '{org: $org, checks: $checks, next_steps: ["webflow-workspaces add \($org)"]}'
+      '{org: $org, checks: $checks, next_steps: ["flowmcp add \($org)"]}'
   fi
   exit 1
 fi
@@ -51,7 +51,7 @@ if [[ "$auth_method" == "mcp-remote" ]]; then
   if wfw_mcp_remote_connected "$org"; then
     wfw_check "session" "ok" "a saved mcp-remote session exists for '$org'"
   else
-    wfw_check "session" "fail" "no saved session. Run: webflow-workspaces connect $org"
+    wfw_check "session" "fail" "no saved session. Run: flowmcp connect $org"
   fi
   wfw_section "mcp-remote availability"
   if command -v npx >/dev/null 2>&1; then
@@ -69,7 +69,7 @@ else
   if wfw_secret_exists "$org"; then
     wfw_check "secret" "ok" "a token is stored for '$org'"
   else
-    wfw_check "secret" "fail" "no token stored. Run: webflow-workspaces secret-set $org"
+    wfw_check "secret" "fail" "no token stored. Run: flowmcp secret-set $org"
   fi
   wfw_section "webflow-mcp-server availability"
   if command -v npx >/dev/null 2>&1; then
@@ -116,7 +116,7 @@ done
 if wfw_json_mode "$json_flag"; then
   jq -nc --arg org "$org" --argjson checks "$(printf '%s\n' "${WFW_CHECKS[@]}" | jq -sc '.')" \
     '{org: $org, checks: $checks,
-      next_steps: [$checks[] | select(.level == "fail") | .detail | select(startswith("Run: ") or test("webflow-workspaces")) ] }'
+      next_steps: [$checks[] | select(.level == "fail") | .detail | select(startswith("Run: ") or test("flowmcp")) ] }'
 else
   echo "== done =="
 fi

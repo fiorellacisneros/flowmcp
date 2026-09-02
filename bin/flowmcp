@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# webflow-workspaces — manage multiple Webflow MCP server connections
+# flowmcp — manage multiple Webflow MCP server connections
 # (one per client/org) safely, keeping tokens out of agent context.
 set -euo pipefail
 
@@ -30,7 +30,7 @@ usage() {
   wfw_banner
   echo
   echo "${WFW_C_DIM}USAGE${WFW_C_RESET}"
-  echo "  webflow-workspaces <command> [args]"
+  echo "  flowmcp <command> [args]"
   echo
   echo "${WFW_C_DIM}ONBOARDING${WFW_C_RESET}"
   wfw_cmd_line "connect" "<org> [--label NAME] — add a client via browser, no setup needed (recommended)"

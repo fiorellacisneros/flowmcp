@@ -1,15 +1,15 @@
 #!/usr/bin/env bash
-# Shared paths, env, and sanity checks for webflow-workspaces.
+# Shared paths, env, and sanity checks for flowmcp.
 # Sourced by every command script. Never echo secrets from anything in lib/.
 
 set -euo pipefail
 
-WFW_HOME="${WFW_HOME:-$HOME/.webflow-workspaces}"
+WFW_HOME="${WFW_HOME:-$HOME/.flowmcp}"
 WFW_PROFILES_DIR="$WFW_HOME/profiles"
 WFW_SECRETS_DIR="$WFW_HOME/secrets"     # only used by the file-fallback backend
 WFW_AUDIT_DIR="$WFW_HOME/audit"
 WFW_MCP_REMOTE_BASE_DIR="$WFW_HOME/mcp-remote"   # per-org isolated mcp-remote token storage
-WFW_KEYCHAIN_SERVICE="webflow-workspaces"
+WFW_KEYCHAIN_SERVICE="flowmcp"
 WFW_MCP_URL="https://mcp.webflow.com/mcp"        # Webflow's official hosted MCP server
 
 wfw_ensure_dirs() {
