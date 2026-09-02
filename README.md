@@ -4,8 +4,6 @@ Manage multiple [`webflow-mcp-server`](https://www.npmjs.com/package/webflow-mcp
 connections — one per client — without ever letting a Webflow API token pass
 through an AI agent's context.
 
-Built [by human, for human](https://www.forhuman.studio/).
-
 ## Install
 
 ```bash
@@ -227,4 +225,4 @@ MIT — see [LICENSE](LICENSE).
 
 ---
 
-Built by human, [forhuman](https://www.forhuman.studio/).
+Built by [forhuman](https://www.forhuman.studio/).
