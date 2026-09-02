@@ -126,6 +126,9 @@ wfw_t_es() {
     msg_remove_ok)        echo "org '%s' eliminado (perfil + credenciales guardadas)" ;;
     msg_install_no_org)   echo "no existe el org '%s' — corre 'flowmcp add %s' o 'connect %s' primero" ;;
     msg_install_ok)       echo "'%s' instalado en %s" ;;
+    msg_install_note_mcpremote) echo "esta entrada corre mcp-remote contra el servidor MCP hosteado de Webflow — no hay ningún token en este archivo, mcp-remote lee su propia sesión aislada" ;;
+    msg_install_note_pat) echo "esta entrada hace referencia a run-mcp.sh, no a un token literal" ;;
+    msg_install_restart)  echo "reinicia %s para que lo tome" ;;
     msg_rename_new_exists) echo "el org '%s' ya existe — elimínalo primero o elige otro nombre" ;;
     msg_rename_ok)        echo "'%s' renombrado a '%s' — no hace falta volver a iniciar sesión" ;;
     msg_rename_hint)      echo "reinicia cualquier cliente cuyo config se haya actualizado para que tome el nuevo nombre" ;;
@@ -203,6 +206,9 @@ wfw_t_en() {
     msg_remove_ok)        echo "removed org '%s' (profile + stored credentials)" ;;
     msg_install_no_org)   echo "no org '%s' registered — run 'flowmcp add %s' or 'connect %s' first" ;;
     msg_install_ok)       echo "installed '%s' into %s" ;;
+    msg_install_note_mcpremote) echo "entry runs mcp-remote against Webflow's hosted MCP server — no token in this file, mcp-remote reads its own isolated session" ;;
+    msg_install_note_pat) echo "entry references run-mcp.sh, not a literal token" ;;
+    msg_install_restart)  echo "restart %s to pick it up" ;;
     msg_rename_new_exists) echo "org '%s' already exists — remove it first or pick a different name" ;;
     msg_rename_ok)        echo "renamed '%s' to '%s' — no re-login needed" ;;
     msg_rename_hint)      echo "restart any client whose config was just updated to pick up the rename" ;;

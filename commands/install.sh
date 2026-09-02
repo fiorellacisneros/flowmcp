@@ -35,9 +35,9 @@ server_name="webflow-$org"
 
 server_json="$(wfw_build_server_json "$org" "$auth_method")"
 if [[ "$auth_method" == "mcp-remote" ]]; then
-  note="entry runs mcp-remote against Webflow's hosted MCP server — no token in this file, mcp-remote reads its own isolated session"
+  note="$(wfw_t msg_install_note_mcpremote)"
 else
-  note="entry references run-mcp.sh, not a literal token"
+  note="$(wfw_t msg_install_note_pat)"
 fi
 
 if [[ -n "$dry_run" ]]; then
@@ -63,5 +63,5 @@ if wfw_json_mode "$json_flag"; then
       next_steps: ["restart \($client) to pick up the new server", "flowmcp test \($org)"]}'
 else
   wfw_say_ok "$(wfw_t msg_install_ok "$server_name" "$config_path")"
-  echo "${WFW_C_DIM}($note — restart $client to pick it up)${WFW_C_RESET}"
+  echo "${WFW_C_DIM}($note — $(wfw_t msg_install_restart "$client"))${WFW_C_RESET}"
 fi
