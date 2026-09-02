@@ -26,7 +26,7 @@ while [[ $# -gt 0 ]]; do
 done
 
 wfw_valid_org "$org" || {
-  wfw_say_err "org name must be lowercase alphanumeric with - or _ (got '$org')"
+  wfw_say_err "$(wfw_t msg_invalid_org "$org")"
   exit 1
 }
 
@@ -51,11 +51,11 @@ trap - INT
 if wfw_mcp_remote_connected "$org"; then
   wfw_profile_set_auth_method "$org" "mcp-remote"
   wfw_audit_log "connect" "$org" "ok"
-  wfw_say_ok "connected '$org' via Webflow's OAuth"
-  wfw_say_next "flowmcp test $org — or 'install $org <client>' to wire it up"
+  wfw_say_ok "$(wfw_t msg_connect_success "$org")"
+  wfw_say_next "$(wfw_t msg_connect_next "$org" "$org")"
 else
   wfw_audit_log "connect" "$org" "fail" "no completed session found"
-  wfw_say_err "no completed session found for '$org' — the login may not have finished"
-  wfw_say_hint "run 'flowmcp connect $org' again and wait until it shows connected"
+  wfw_say_err "$(wfw_t msg_connect_fail "$org")"
+  wfw_say_hint "$(wfw_t msg_connect_fail_hint "$org")"
   exit 1
 fi

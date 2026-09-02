@@ -23,7 +23,7 @@ while [[ $# -gt 0 ]]; do
 done
 
 wfw_profile_exists "$org" || {
-  wfw_say_err "no org '$org' registered"
+  wfw_say_err "$(wfw_t msg_org_not_found "$org")"
   exit 1
 }
 
@@ -49,8 +49,8 @@ if [[ -z "$confirmed" ]]; then
   if wfw_json_mode "$json_flag"; then
     jq -nc --arg org "$org" '{ok: false, error: "confirmation required", next_steps: ["flowmcp remove \($org) --yes"]}'
   else
-    wfw_say_err "this deletes the profile and the stored token for '$org'."
-    wfw_say_hint "re-run with --yes to confirm"
+    wfw_say_err "$(wfw_t msg_remove_confirm_needed "$org")"
+    wfw_say_hint "$(wfw_t msg_remove_confirm_hint)"
     echo "${WFW_C_DIM}exit 1 · refused by a gate · nothing was deleted${WFW_C_RESET}" >&2
   fi
   exit 1
@@ -65,7 +65,7 @@ for spec in "${froms[@]:-}"; do
   if [[ -n "$config_path" && -f "$config_path" ]]; then
     wfw_client_remove_server "$config_path" "webflow-$org"
     removed_from+=("$config_path")
-    wfw_json_mode "$json_flag" || wfw_say_ok "removed 'webflow-$org' from $config_path"
+    wfw_json_mode "$json_flag" || wfw_say_ok "$(wfw_t msg_remove_stripped "$org" "$config_path")"
   fi
 done
 
@@ -78,5 +78,5 @@ if wfw_json_mode "$json_flag"; then
   jq -nc --arg org "$org" --argjson removed "$(printf '%s\n' "${removed_from[@]:-}" | jq -R . | jq -sc 'map(select(length>0))')" \
     '{ok: true, dry_run: false, org: $org, removed_from: $removed}'
 else
-  wfw_say_ok "removed org '$org' (profile + stored credentials)"
+  wfw_say_ok "$(wfw_t msg_remove_ok "$org")"
 fi

@@ -25,7 +25,7 @@ if [[ -n "$new_lang" ]]; then
   if wfw_json_mode "$json_flag"; then
     jq -nc --arg lang "$new_lang" '{ok: true, lang: $lang}'
   else
-    wfw_say_ok "language set to $new_lang"
+    wfw_say_ok "$(wfw_t msg_lang_set "$new_lang")"
   fi
   exit 0
 fi

@@ -18,12 +18,12 @@ while [[ $# -gt 0 ]]; do
 done
 
 wfw_valid_org "$org" || {
-  wfw_say_err "org name must be lowercase alphanumeric with - or _ (got '$org')"
+  wfw_say_err "$(wfw_t msg_invalid_org "$org")"
   exit 1
 }
 
 if wfw_profile_exists "$org"; then
-  wfw_say_err "org '$org' already exists (use 'rotate' to change its token, or 'remove' first)"
+  wfw_say_err "$(wfw_t msg_org_exists "$org")"
   exit 1
 fi
 
@@ -31,7 +31,7 @@ wfw_profile_write_new "$org" "$label"
 wfw_audit_log "add" "$org" "ok"
 
 backend="$(wfw_secret_backend)"
-wfw_say_ok "registered org '$org' (label: $label) · secret backend: $backend"
+wfw_say_ok "$(wfw_t msg_add_ok "$org" "$label" "$backend")"
 echo
 wfw_say_next "$(wfw_t msg_add_recommend "$org")"
 echo

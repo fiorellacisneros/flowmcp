@@ -25,7 +25,7 @@ while [[ $# -gt 0 ]]; do
 done
 
 wfw_profile_exists "$org" || {
-  wfw_say_err "no org '$org' registered — run 'flowmcp add $org' or 'connect $org' first"
+  wfw_say_err "$(wfw_t msg_install_no_org "$org" "$org" "$org")"
   exit 1
 }
 
@@ -62,6 +62,6 @@ if wfw_json_mode "$json_flag"; then
     '{ok: true, dry_run: false, org: $org, client: $client, scope: $scope, path: $path, server_name: $name,
       next_steps: ["restart \($client) to pick up the new server", "flowmcp test \($org)"]}'
 else
-  wfw_say_ok "installed '$server_name' into $config_path"
+  wfw_say_ok "$(wfw_t msg_install_ok "$server_name" "$config_path")"
   echo "${WFW_C_DIM}($note — restart $client to pick it up)${WFW_C_RESET}"
 fi

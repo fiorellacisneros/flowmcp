@@ -111,6 +111,30 @@ wfw_t_es() {
     msg_test_hint_new)    echo "Corre 'flowmcp test %s' para verificar que el nuevo token funciona." ;;
     msg_inspect_no_session) echo "nota: aún no hay sesión guardada para '%s' — corre 'flowmcp connect %s'" ;;
     msg_inspect_no_token) echo "nota: aún no hay token guardado para '%s' — corre 'flowmcp secret-set %s'" ;;
+    msg_invalid_org)      echo "el nombre del org debe ser alfanumérico en minúsculas con - o _ (recibido '%s')" ;;
+    msg_org_not_found)    echo "no existe el org '%s'" ;;
+    msg_org_exists)       echo "el org '%s' ya existe (usa 'rotate' para cambiar su token, o 'remove' primero)" ;;
+    msg_add_ok)           echo "org '%s' registrado (label: %s) · backend de secretos: %s" ;;
+    msg_lang_set)         echo "idioma cambiado a %s" ;;
+    msg_connect_success)  echo "'%s' conectado vía OAuth de Webflow" ;;
+    msg_connect_next)     echo "flowmcp test %s — o 'install %s <client>' para conectarlo" ;;
+    msg_connect_fail)     echo "no se encontró una sesión completa para '%s' — puede que el login no haya terminado" ;;
+    msg_connect_fail_hint) echo "corre 'flowmcp connect %s' de nuevo y espera a que muestre conectado" ;;
+    msg_remove_confirm_needed) echo "esto elimina el perfil y el token guardado de '%s'." ;;
+    msg_remove_confirm_hint)   echo "vuelve a correrlo con --yes para confirmar" ;;
+    msg_remove_stripped)  echo "se quitó 'webflow-%s' de %s" ;;
+    msg_remove_ok)        echo "org '%s' eliminado (perfil + credenciales guardadas)" ;;
+    msg_install_no_org)   echo "no existe el org '%s' — corre 'flowmcp add %s' o 'connect %s' primero" ;;
+    msg_install_ok)       echo "'%s' instalado en %s" ;;
+    msg_rename_new_exists) echo "el org '%s' ya existe — elimínalo primero o elige otro nombre" ;;
+    msg_rename_ok)        echo "'%s' renombrado a '%s' — no hace falta volver a iniciar sesión" ;;
+    msg_rename_hint)      echo "reinicia cualquier cliente cuyo config se haya actualizado para que tome el nuevo nombre" ;;
+    msg_test_mcpremote_ok) echo "'%s' tiene una sesión de Webflow guardada (mcp-remote)" ;;
+    msg_test_note1)       echo "nota: esto solo verifica que se guardó una sesión, no que siga siendo válida —" ;;
+    msg_test_note2)       echo "un cliente real (Claude Code/Cursor/Claude Desktop) la va a refrescar o" ;;
+    msg_test_note3)       echo "volver a pedir automáticamente la próxima vez que se conecte." ;;
+    msg_test_pat_ok)      echo "el token de '%s' es válido · sitios accesibles: %s" ;;
+    msg_test_scopes)      echo "permisos: %s" ;;
     *)                    wfw_t_en "$key" ;;
   esac
 }
@@ -163,6 +187,30 @@ wfw_t_en() {
     msg_test_hint_new)    echo "Run 'flowmcp test %s' to verify the new token works." ;;
     msg_inspect_no_session) echo "note: no saved session yet for '%s' — run 'flowmcp connect %s'" ;;
     msg_inspect_no_token) echo "note: no token stored yet for '%s' — run 'flowmcp secret-set %s'" ;;
+    msg_invalid_org)      echo "org name must be lowercase alphanumeric with - or _ (got '%s')" ;;
+    msg_org_not_found)    echo "no org '%s' registered" ;;
+    msg_org_exists)       echo "org '%s' already exists (use 'rotate' to change its token, or 'remove' first)" ;;
+    msg_add_ok)           echo "registered org '%s' (label: %s) · secret backend: %s" ;;
+    msg_lang_set)         echo "language set to %s" ;;
+    msg_connect_success)  echo "connected '%s' via Webflow's OAuth" ;;
+    msg_connect_next)     echo "flowmcp test %s — or 'install %s <client>' to wire it up" ;;
+    msg_connect_fail)     echo "no completed session found for '%s' — the login may not have finished" ;;
+    msg_connect_fail_hint) echo "run 'flowmcp connect %s' again and wait until it shows connected" ;;
+    msg_remove_confirm_needed) echo "this deletes the profile and the stored token for '%s'." ;;
+    msg_remove_confirm_hint)   echo "re-run with --yes to confirm" ;;
+    msg_remove_stripped)  echo "removed 'webflow-%s' from %s" ;;
+    msg_remove_ok)        echo "removed org '%s' (profile + stored credentials)" ;;
+    msg_install_no_org)   echo "no org '%s' registered — run 'flowmcp add %s' or 'connect %s' first" ;;
+    msg_install_ok)       echo "installed '%s' into %s" ;;
+    msg_rename_new_exists) echo "org '%s' already exists — remove it first or pick a different name" ;;
+    msg_rename_ok)        echo "renamed '%s' to '%s' — no re-login needed" ;;
+    msg_rename_hint)      echo "restart any client whose config was just updated to pick up the rename" ;;
+    msg_test_mcpremote_ok) echo "'%s' has a saved Webflow session (mcp-remote)" ;;
+    msg_test_note1)       echo "note: this only checks a session was saved, not that it's still valid —" ;;
+    msg_test_note2)       echo "a real client (Claude Code/Cursor/Claude Desktop) will refresh or" ;;
+    msg_test_note3)       echo "re-prompt automatically the next time it connects." ;;
+    msg_test_pat_ok)      echo "token for '%s' is valid · sites accessible: %s" ;;
+    msg_test_scopes)      echo "scopes: %s" ;;
     *)                    echo "$key" ;;
   esac
 }

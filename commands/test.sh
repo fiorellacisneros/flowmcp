@@ -19,7 +19,7 @@ wfw_profile_exists "$org" || {
   if wfw_json_mode "$json_flag"; then
     jq -nc --arg org "$org" '{org: $org, status: "fail", error: "org not registered"}'
   else
-    wfw_say_err "no org '$org' registered"
+    wfw_say_err "$(wfw_t msg_org_not_found "$org")"
   fi
   exit 1
 }
@@ -43,13 +43,13 @@ wfw_test_emit() {
   else
     if [[ "$status" == "ok" ]]; then
       if [[ "$auth_method" == "mcp-remote" ]]; then
-        wfw_say_ok "'$org' has a saved Webflow session (mcp-remote)"
-        echo "${WFW_C_DIM}note: this only checks a session was saved, not that it's still valid —${WFW_C_RESET}"
-        echo "${WFW_C_DIM}a real client (Claude Code/Cursor/Claude Desktop) will refresh or${WFW_C_RESET}"
-        echo "${WFW_C_DIM}re-prompt automatically the next time it connects.${WFW_C_RESET}"
+        wfw_say_ok "$(wfw_t msg_test_mcpremote_ok "$org")"
+        echo "${WFW_C_DIM}$(wfw_t msg_test_note1)"
+        echo "$(wfw_t msg_test_note2)"
+        echo "$(wfw_t msg_test_note3)${WFW_C_RESET}"
       else
-        wfw_say_ok "token for '$org' is valid · sites accessible: $sites_count"
-        [[ "$scopes_json" != "[]" ]] && echo "${WFW_C_DIM}scopes: $(jq -r 'join(", ")' <<<"$scopes_json")${WFW_C_RESET}"
+        wfw_say_ok "$(wfw_t msg_test_pat_ok "$org" "$sites_count")"
+        [[ "$scopes_json" != "[]" ]] && echo "${WFW_C_DIM}$(wfw_t msg_test_scopes "$(jq -r 'join(", ")' <<<"$scopes_json")")${WFW_C_RESET}"
       fi
     else
       wfw_say_err "$err_msg"

@@ -20,17 +20,17 @@ while [[ $# -gt 0 ]]; do
 done
 
 wfw_valid_org "$new" || {
-  wfw_say_err "org name must be lowercase alphanumeric with - or _ (got '$new')"
+  wfw_say_err "$(wfw_t msg_invalid_org "$new")"
   exit 1
 }
 
 wfw_profile_exists "$old" || {
-  wfw_say_err "no org '$old' registered"
+  wfw_say_err "$(wfw_t msg_org_not_found "$old")"
   exit 1
 }
 
 if wfw_profile_exists "$new"; then
-  wfw_say_err "org '$new' already exists — remove it first or pick a different name"
+  wfw_say_err "$(wfw_t msg_rename_new_exists "$new")"
   exit 1
 fi
 
@@ -94,11 +94,11 @@ if wfw_json_mode "$json_flag"; then
     '{ok: true, dry_run: false, old: $old, new: $new, updated: $updated,
       next_steps: (if ($updated | length) > 0 then ["restart any client whose config was just updated"] else [] end)}'
 else
-  wfw_say_ok "renamed '$old' to '$new' — no re-login needed"
+  wfw_say_ok "$(wfw_t msg_rename_ok "$old" "$new")"
   if [[ ${#updated[@]} -gt 0 ]]; then
     for p in "${updated[@]}"; do
       echo "${WFW_C_DIM}updated: $p (webflow-$old -> webflow-$new)${WFW_C_RESET}"
     done
-    wfw_say_hint "restart any client whose config was just updated to pick up the rename"
+    wfw_say_hint "$(wfw_t msg_rename_hint)"
   fi
 fi
