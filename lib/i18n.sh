@@ -135,6 +135,7 @@ wfw_t_es() {
     msg_test_note3)       echo "volver a pedir automáticamente la próxima vez que se conecte." ;;
     msg_test_pat_ok)      echo "el token de '%s' es válido · sitios accesibles: %s" ;;
     msg_test_scopes)      echo "permisos: %s" ;;
+    msg_test_next_intro)  echo "instálalo en el cliente que uses:" ;;
     *)                    wfw_t_en "$key" ;;
   esac
 }
@@ -211,6 +212,7 @@ wfw_t_en() {
     msg_test_note3)       echo "re-prompt automatically the next time it connects." ;;
     msg_test_pat_ok)      echo "token for '%s' is valid · sites accessible: %s" ;;
     msg_test_scopes)      echo "scopes: %s" ;;
+    msg_test_next_intro)  echo "install it into whichever client you're using:" ;;
     *)                    echo "$key" ;;
   esac
 }

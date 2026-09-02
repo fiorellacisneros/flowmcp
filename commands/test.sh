@@ -51,6 +51,11 @@ wfw_test_emit() {
         wfw_say_ok "$(wfw_t msg_test_pat_ok "$org" "$sites_count")"
         [[ "$scopes_json" != "[]" ]] && echo "${WFW_C_DIM}$(wfw_t msg_test_scopes "$(jq -r 'join(", ")' <<<"$scopes_json")")${WFW_C_RESET}"
       fi
+      echo
+      wfw_say_next "$(wfw_t msg_test_next_intro)"
+      echo "  - claude-code:    flowmcp install $org claude-code"
+      echo "  - claude-desktop: flowmcp install $org claude-desktop"
+      echo "  - cursor:         flowmcp install $org cursor"
     else
       wfw_say_err "$err_msg"
       [[ -n "$hint" ]] && wfw_say_hint "$hint"
