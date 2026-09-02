@@ -16,13 +16,13 @@ wfw_profile_exists "$org" || {
 }
 
 if [[ ! -t 0 ]]; then
-  echo "error: secret-set requires an interactive terminal (stdin is not a TTY)." >&2
-  echo "Run this command yourself in a real terminal window — do not pipe input" >&2
-  echo "into it and do not run it via an agent/automation tool." >&2
+  wfw_t msg_need_tty_secret >&2
+  wfw_t msg_run_yourself1 >&2
+  wfw_t msg_run_yourself2 >&2
   exit 1
 fi
 
-echo "Enter Webflow API token for '$org' (input hidden, press Enter when done):"
+wfw_t msg_secretset_enter "$org"
 read -rs wfw_token_input
 echo
 if [[ -z "$wfw_token_input" ]]; then
@@ -33,5 +33,5 @@ fi
 wfw_secret_set "$org" wfw_token_input
 wfw_audit_log "secret-set" "$org" "ok"
 
-echo "Stored token for '$org' via $(wfw_secret_backend)."
-echo "Run 'flowmcp test $org' to verify it works."
+wfw_t msg_secretset_stored "$org" "$(wfw_secret_backend)"
+wfw_t msg_test_hint "$org"

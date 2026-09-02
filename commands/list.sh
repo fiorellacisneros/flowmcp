@@ -20,7 +20,7 @@ if wfw_json_mode "$json_flag"; then
 fi
 
 if [[ ${#orgs[@]} -eq 0 ]]; then
-  echo "No orgs registered yet. Run 'flowmcp add <org>' to start."
+  wfw_t msg_no_orgs
   exit 0
 fi
 

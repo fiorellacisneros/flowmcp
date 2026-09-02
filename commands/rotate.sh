@@ -13,12 +13,12 @@ wfw_profile_exists "$org" || {
 }
 
 if [[ ! -t 0 ]]; then
-  echo "error: rotate requires an interactive terminal (stdin is not a TTY)." >&2
-  echo "Run this command yourself in a real terminal window." >&2
+  wfw_t msg_need_tty_rotate >&2
+  wfw_t msg_run_yourself_short >&2
   exit 1
 fi
 
-echo "Rotating token for '$org'. Enter the new Webflow API token (input hidden):"
+wfw_t msg_rotate_enter "$org"
 read -rs wfw_token_input
 echo
 if [[ -z "$wfw_token_input" ]]; then
@@ -29,5 +29,5 @@ fi
 wfw_secret_set "$org" wfw_token_input
 wfw_audit_log "rotate" "$org" "ok"
 
-echo "Rotated token for '$org' via $(wfw_secret_backend)."
-echo "Run 'flowmcp test $org' to verify the new token works."
+wfw_t msg_rotate_done "$org" "$(wfw_secret_backend)"
+wfw_t msg_test_hint_new "$org"

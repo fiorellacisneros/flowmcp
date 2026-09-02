@@ -31,7 +31,7 @@ wfw_valid_org "$org" || {
 }
 
 if wfw_profile_exists "$org"; then
-  echo "${WFW_C_DIM}reconnecting existing org '$org'...${WFW_C_RESET}"
+  echo "${WFW_C_DIM}$(wfw_t msg_reconnecting "$org")${WFW_C_RESET}"
 else
   wfw_profile_write_new "$org" "$label" "mcp-remote"
 fi
@@ -39,9 +39,9 @@ fi
 remote_dir="$(wfw_mcp_remote_dir "$org")"
 mkdir -p "$remote_dir"
 
-echo "Opening your browser for '$org' to approve access to Webflow..."
-echo "Once you see it connect below, press Ctrl+C to return here — your"
-echo "session is already saved to disk by that point."
+wfw_t msg_connect_opening "$org"
+wfw_t msg_connect_ctrlc1
+wfw_t msg_connect_ctrlc2
 echo
 
 trap '' INT   # let mcp-remote (child) react to Ctrl+C; don't let it kill this script too

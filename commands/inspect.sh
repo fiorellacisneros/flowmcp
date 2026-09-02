@@ -51,8 +51,8 @@ jq . "$(wfw_profile_path "$org")"
 echo
 if [[ "$connected" == "false" ]]; then
   if [[ "$auth_method" == "mcp-remote" ]]; then
-    echo "note: no saved session yet for '$org' — run 'flowmcp connect $org'"
+    wfw_t msg_inspect_no_session "$org" "$org"
   else
-    echo "note: no token stored yet for '$org' — run 'flowmcp secret-set $org'"
+    wfw_t msg_inspect_no_token "$org" "$org"
   fi
 fi

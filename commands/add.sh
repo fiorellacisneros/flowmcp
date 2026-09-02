@@ -32,10 +32,10 @@ wfw_audit_log "add" "$org" "ok"
 backend="$(wfw_secret_backend)"
 wfw_say_ok "registered org '$org' (label: $label) · secret backend: $backend"
 echo
-wfw_say_next "run this yourself, in your own terminal (not through an agent):"
+wfw_say_next "$(wfw_t msg_add_run_yourself)"
 echo
 echo "    flowmcp secret-set $org"
 echo
-echo "${WFW_C_DIM}It will prompt for the Webflow API token with hidden input and store it"
-echo "directly in $backend. The token is never passed as a command argument"
-echo "and never printed.${WFW_C_RESET}"
+echo "${WFW_C_DIM}$(wfw_t msg_add_explain1)"
+echo "$(wfw_t msg_add_explain2 "$backend")"
+echo "$(wfw_t msg_add_explain3)${WFW_C_RESET}"
