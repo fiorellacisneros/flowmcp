@@ -139,6 +139,18 @@ wfw_t_es() {
     msg_test_pat_ok)      echo "el token de '%s' es válido · sitios accesibles: %s" ;;
     msg_test_scopes)      echo "permisos: %s" ;;
     msg_test_next_intro)  echo "instálalo en el cliente que uses:" ;;
+    dbg_header)           echo "== diagnóstico flowmcp: %s ==" ;;
+    dbg_done)             echo "== listo ==" ;;
+    dbg_sec_profile)      echo "perfil" ;;
+    dbg_sec_auth)         echo "método de auth: %s" ;;
+    dbg_sec_mcpremote_avail) echo "disponibilidad de mcp-remote" ;;
+    dbg_sec_secret_backend) echo "backend de secretos: %s" ;;
+    dbg_sec_wfmcp_avail)  echo "disponibilidad de webflow-mcp-server" ;;
+    dbg_sec_cred_check)   echo "verificación de credenciales" ;;
+    dbg_sec_client_configs) echo "configs de clientes conocidos" ;;
+    dbg_level_fail)       echo "FALLO" ;;
+    dbg_level_warn)       echo "AVISO" ;;
+    dbg_level_note)       echo "nota" ;;
     *)                    wfw_t_en "$key" ;;
   esac
 }
@@ -219,6 +231,18 @@ wfw_t_en() {
     msg_test_pat_ok)      echo "token for '%s' is valid · sites accessible: %s" ;;
     msg_test_scopes)      echo "scopes: %s" ;;
     msg_test_next_intro)  echo "install it into whichever client you're using:" ;;
+    dbg_header)           echo "== flowmcp debug: %s ==" ;;
+    dbg_done)             echo "== done ==" ;;
+    dbg_sec_profile)      echo "profile" ;;
+    dbg_sec_auth)         echo "auth method: %s" ;;
+    dbg_sec_mcpremote_avail) echo "mcp-remote availability" ;;
+    dbg_sec_secret_backend) echo "secret backend: %s" ;;
+    dbg_sec_wfmcp_avail)  echo "webflow-mcp-server availability" ;;
+    dbg_sec_cred_check)   echo "credential check" ;;
+    dbg_sec_client_configs) echo "known client configs" ;;
+    dbg_level_fail)       echo "FAIL" ;;
+    dbg_level_warn)       echo "WARN" ;;
+    dbg_level_note)       echo "note" ;;
     *)                    echo "$key" ;;
   esac
 }

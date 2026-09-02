@@ -19,9 +19,9 @@ wfw_check() {
   if ! wfw_json_mode "$json_flag"; then
     case "$level" in
       ok)   echo "ok: $detail" ;;
-      fail) echo "FAIL: $detail" ;;
-      warn) echo "WARN: $detail" ;;
-      *)    echo "note: $detail" ;;
+      fail) echo "$(wfw_t dbg_level_fail): $detail" ;;
+      warn) echo "$(wfw_t dbg_level_warn): $detail" ;;
+      *)    echo "$(wfw_t dbg_level_note): $detail" ;;
     esac
   fi
 }
@@ -30,9 +30,9 @@ wfw_section() {
   wfw_json_mode "$json_flag" || echo "-- $1 --"
 }
 
-wfw_json_mode "$json_flag" || echo "== flowmcp debug: $org =="
+wfw_json_mode "$json_flag" || wfw_t dbg_header "$org"
 
-wfw_section "profile"
+wfw_section "$(wfw_t dbg_sec_profile)"
 if wfw_profile_exists "$org"; then
   wfw_check "profile" "ok" "profile exists at $(wfw_profile_path "$org")"
 else
@@ -45,7 +45,7 @@ else
 fi
 
 auth_method="$(jq -r '.auth_method // "pat"' <<<"$(wfw_profile_read "$org")")"
-wfw_json_mode "$json_flag" || echo "-- auth method: $auth_method --"
+wfw_section "$(wfw_t dbg_sec_auth "$auth_method")"
 
 if [[ "$auth_method" == "mcp-remote" ]]; then
   if wfw_mcp_remote_connected "$org"; then
@@ -53,7 +53,7 @@ if [[ "$auth_method" == "mcp-remote" ]]; then
   else
     wfw_check "session" "fail" "no saved session. Run: flowmcp connect $org"
   fi
-  wfw_section "mcp-remote availability"
+  wfw_section "$(wfw_t dbg_sec_mcpremote_avail)"
   if command -v npx >/dev/null 2>&1; then
     if ver="$(npm view mcp-remote version 2>/dev/null)"; then
       wfw_check "mcp-remote" "ok" "reachable on npm (latest: $ver)"
@@ -65,13 +65,13 @@ if [[ "$auth_method" == "mcp-remote" ]]; then
   fi
 else
   backend="$(wfw_secret_backend)"
-  wfw_section "secret backend: $backend"
+  wfw_section "$(wfw_t dbg_sec_secret_backend "$backend")"
   if wfw_secret_exists "$org"; then
     wfw_check "secret" "ok" "a token is stored for '$org'"
   else
     wfw_check "secret" "fail" "no token stored. Run: flowmcp secret-set $org"
   fi
-  wfw_section "webflow-mcp-server availability"
+  wfw_section "$(wfw_t dbg_sec_wfmcp_avail)"
   if command -v npx >/dev/null 2>&1; then
     if ver="$(npm view webflow-mcp-server version 2>/dev/null)"; then
       wfw_check "webflow-mcp-server" "ok" "reachable on npm (latest: $ver)"
@@ -83,7 +83,7 @@ else
   fi
 fi
 
-wfw_section "credential check"
+wfw_section "$(wfw_t dbg_sec_cred_check)"
 test_json="$("$WFW_COMMANDS_DIR/test.sh" "$org" --json 2>/dev/null || true)"
 test_status="$(jq -r '.status // "fail"' <<<"$test_json" 2>/dev/null || echo fail)"
 wfw_check "credentials" "$([[ "$test_status" == "ok" ]] && echo ok || echo fail)" "$(jq -r '.error // "valid"' <<<"$test_json" 2>/dev/null || echo "check failed")"
@@ -91,7 +91,7 @@ if ! wfw_json_mode "$json_flag"; then
   "$WFW_COMMANDS_DIR/test.sh" "$org" || true
 fi
 
-wfw_section "known client configs"
+wfw_section "$(wfw_t dbg_sec_client_configs)"
 for spec in "claude-code:user" "claude-code:project" "claude-desktop:user" "cursor:user" "cursor:project"; do
   client="${spec%%:*}"; scope="${spec#*:}"
   path="$(wfw_client_config_path "$client" "$scope" 2>/dev/null || true)"
@@ -118,5 +118,5 @@ if wfw_json_mode "$json_flag"; then
     '{org: $org, checks: $checks,
       next_steps: [$checks[] | select(.level == "fail") | .detail | select(startswith("Run: ") or test("flowmcp")) ] }'
 else
-  echo "== done =="
+  wfw_t dbg_done
 fi
