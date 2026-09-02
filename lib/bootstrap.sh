@@ -14,4 +14,5 @@ if ! declare -f wfw_profile_exists >/dev/null 2>&1; then
   source "$WFW_LIB_DIR/clients.sh"
   source "$WFW_LIB_DIR/oauth.sh"
   source "$WFW_LIB_DIR/ui.sh"
+  source "$WFW_LIB_DIR/i18n.sh"
 fi

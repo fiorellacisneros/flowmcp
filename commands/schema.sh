@@ -111,6 +111,14 @@ jq -nc --arg version "$(wfw_version)" '
       requires_tty: false,
       description: "This output.",
       output: {shape: "object", fields: ["schema_version","cli_version","commands"]}
+    },
+    {
+      name: "lang",
+      usage: "lang [en|es] [--json]",
+      mutates: true,
+      requires_tty: false,
+      description: "View or change the saved human-readable output language. Only affects --help/banner text, never JSON.",
+      output: {shape: "object", fields: ["lang"]}
     }
   ],
   conventions: {

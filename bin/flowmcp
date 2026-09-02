@@ -29,37 +29,40 @@ wfw_cmd_line() {
 usage() {
   wfw_banner
   echo
-  echo "${WFW_C_DIM}USAGE${WFW_C_RESET}"
+  echo "${WFW_C_DIM}$(wfw_t usage)${WFW_C_RESET}"
   echo "  flowmcp <command> [args]"
   echo
-  echo "${WFW_C_DIM}ONBOARDING${WFW_C_RESET}"
-  wfw_cmd_line "connect" "<org> [--label NAME] — add a client via browser, no setup needed (recommended)"
-  wfw_cmd_line "add" "<org> [--label NAME] — register org metadata only"
-  wfw_cmd_line "secret-set" "<org> — paste a token manually (headless fallback)"
-  wfw_cmd_line "rotate" "<org> — replace a stored token"
+  echo "${WFW_C_DIM}$(wfw_t onboarding)${WFW_C_RESET}"
+  wfw_cmd_line "connect" "$(wfw_t cmd_connect)"
+  wfw_cmd_line "add" "$(wfw_t cmd_add)"
+  wfw_cmd_line "secret-set" "$(wfw_t cmd_secret_set)"
+  wfw_cmd_line "rotate" "$(wfw_t cmd_rotate)"
   echo
-  echo "${WFW_C_DIM}DAILY USE${WFW_C_RESET}"
-  wfw_cmd_line "list" "list registered orgs + last test status"
-  wfw_cmd_line "inspect" "<org> [--live] — show profile detail"
-  wfw_cmd_line "test" "<org> — validate the stored credentials"
-  wfw_cmd_line "install" "<org> <client> [--scope user|project] [--force]"
-  printf "  %-11s %s\n" "" "client: claude-code | claude-desktop | cursor"
-  wfw_cmd_line "remove" "<org> --yes [--from client:scope]... — delete profile + credentials"
-  wfw_cmd_line "debug" "<org> — diagnose a broken connection"
-  wfw_cmd_line "rename" "<old-org> <new-org> — no re-login needed"
-  wfw_cmd_line "schema" "machine-readable command/JSON reference for agents"
+  echo "${WFW_C_DIM}$(wfw_t daily_use)${WFW_C_RESET}"
+  wfw_cmd_line "list" "$(wfw_t cmd_list)"
+  wfw_cmd_line "inspect" "$(wfw_t cmd_inspect)"
+  wfw_cmd_line "test" "$(wfw_t cmd_test)"
+  wfw_cmd_line "install" "$(wfw_t cmd_install)"
+  printf "  %-11s %s\n" "" "$(wfw_t cmd_install_clients)"
+  wfw_cmd_line "remove" "$(wfw_t cmd_remove)"
+  wfw_cmd_line "debug" "$(wfw_t cmd_debug)"
+  wfw_cmd_line "rename" "$(wfw_t cmd_rename)"
+  wfw_cmd_line "schema" "$(wfw_t cmd_schema)"
+  wfw_cmd_line "lang" "$(wfw_t cmd_lang)"
   echo
-  echo "${WFW_C_DIM}security · this tool never accepts a token as a command-line argument and${WFW_C_RESET}"
-  echo "${WFW_C_DIM}never prints one. secret-set/rotate require a real interactive TTY; connect${WFW_C_RESET}"
-  echo "${WFW_C_DIM}opens a real browser (via mcp-remote, Webflow's own OAuth — no app to set up).${WFW_C_RESET}"
+  echo "${WFW_C_DIM}$(wfw_t security_1)${WFW_C_RESET}"
+  echo "${WFW_C_DIM}$(wfw_t security_2)${WFW_C_RESET}"
+  echo "${WFW_C_DIM}$(wfw_t security_3)${WFW_C_RESET}"
 }
+
+wfw_prompt_lang_if_needed
 
 cmd="${1:-}"
 [[ -n "$cmd" ]] || { usage; exit 1; }
 shift || true
 
 case "$cmd" in
-  add|list|inspect|test|install|remove|rotate|debug|secret-set|connect|rename|schema)
+  add|list|inspect|test|install|remove|rotate|debug|secret-set|connect|rename|schema|lang)
     # shellcheck disable=SC1090
     source "$WFW_COMMANDS_DIR/$cmd.sh" "$@"
     ;;

@@ -1,8 +1,13 @@
 # flowmcp
 
-Manage multiple [`webflow-mcp-server`](https://www.npmjs.com/package/webflow-mcp-server)
-connections — one per client — without ever letting a Webflow API token pass
-through an AI agent's context.
+Connect every client's Webflow account to your AI agent — one at a time,
+safely, without a token ever touching the conversation.
+
+If you run an agency, you likely need a separate Webflow connection per
+client. `flowmcp` is a CLI (+ a Claude Code skill) that manages all of them
+side by side: add a client in seconds, the token lives only in your OS
+keychain, and your agent can add/list/test/install connections on your
+behalf — but can never see, hold, or print the token itself.
 
 ## Install
 
@@ -28,9 +33,8 @@ fmcp install acme claude-code --scope project
 
 No OAuth App to create, no client ID/secret to manage — `connect` shells out
 to [`mcp-remote`](https://www.npmjs.com/package/mcp-remote) against Webflow's
-own hosted MCP server, which supports Dynamic Client Registration and PKCE.
-No browser available (headless environment)? Use a manually-pasted token
-instead:
+own hosted MCP server. No browser available (headless environment)? Use a
+manually-pasted token instead:
 
 ```bash
 fmcp add acme --label "Acme Corp"
@@ -40,36 +44,18 @@ fmcp install acme claude-code --scope project
 # restart the target app to pick up the new MCP server
 ```
 
-Ask `fmcp schema` for a machine-readable map of every command — usage, JSON
-shape, whether it mutates, requires a TTY, or is destructive. That's the
-first thing an agent driving this CLI should run.
+The first time a human runs `flowmcp` interactively, it asks once whether to
+show help text in English or Español, and remembers it
+(`flowmcp lang es` changes it later; JSON output is unaffected either way).
 
-## Why
+## What it does
 
-If you run an agency, you need one Webflow API token per client workspace
-(plus your own). MCP ties a connection to a single token, so a multi-client
-setup means hand-editing `mcpServers` blocks in Claude Code / Claude Desktop
-/ Cursor config for every client — and it's easy to end up with tokens
-sitting in plaintext JSON files, or worse, pasted into an agent chat where
-they land in logs forever.
-
-This is a small CLI plus a [Claude Code skill](SKILL.md) that:
-
-- registers one **profile** per org (label, metadata — no secret),
-- stores the actual token in your **OS keychain** (macOS Keychain / Linux
-  Secret Service via `secret-tool`), falling back to a `chmod 600` file only
-  when no keychain is available,
-- writes `mcpServers` entries that point at a small wrapper script which
-  resolves the token from the keychain **at MCP-server launch time** — so no
-  client config file ever contains a literal token,
-- refuses to accept a token as a CLI argument or print one, ever. The only
-  two commands that touch a token (`secret-set`, `rotate`) require a real
-  interactive TTY and read it via a hidden `read -s` prompt.
-
-This last point is the reason it exists as a *skill*, not just a script: an
-AI agent driving your terminal should be able to add, list, test, install,
-and debug connections on your behalf — but should never be in the loop for
-the token itself.
+- Registers one **profile** per client (label, metadata — no secret).
+- Stores the actual token in your **OS keychain**, never in a client config
+  file, never in an agent's context.
+- Lets an AI agent drive the whole workflow (add, list, test, install,
+  debug) except the two commands that touch a token — those require you,
+  in your own terminal, by design.
 
 ## Commands
 
@@ -90,30 +76,23 @@ the token itself.
 
 Supported clients for `install`: `claude-code`, `claude-desktop`, `cursor`.
 
-`list`/`inspect`/`test`/`debug`/`install`/`remove`/`rename` print JSON
-automatically whenever stdout isn't a real TTY (piped, redirected, or
-invoked by an agent's tool call) — `--json` only matters when you want
-machine output in your own terminal. JSON responses include a `next_steps`
-array naming the follow-up command, when there is an obvious one.
-
-`install`, `remove`, and `rename` are the only commands that touch a real,
-shared client config file (Claude Code/Desktop/Cursor) — the one place here
-where a wrong call has a real blast radius — so all three support `--dry-run`
-to preview the change before it's written, and `remove` requires an explicit
-`--yes` with no interactive fallback.
-
 ## For agents
 
-Symlink or copy this repo into `.claude/skills/flowmcp/`
-(project-level) or `~/.claude/skills/flowmcp/` (user-level) —
-[`SKILL.md`](SKILL.md) at the repo root is the skill definition an agent
-reads. It documents the same JSON contract as `fmcp schema`, plus the workflow
-an agent should follow: never call `secret-set`/`rotate` on the user's
-behalf, always check `fmcp schema` once per session instead of `--help`, and
-prefer `--dry-run` before any `install`/`remove`/`rename` you're not certain
-about.
+Symlink or copy this repo into `.claude/skills/flowmcp/` (project-level) or
+`~/.claude/skills/flowmcp/` (user-level) — [`SKILL.md`](SKILL.md) at the repo
+root is the skill definition an agent reads. In short: run `fmcp schema`
+once per session instead of parsing `--help`, everything already prints JSON
+when stdout isn't a TTY, and `install`/`remove`/`rename` support `--dry-run`
+for anything you're not certain about.
 
-## How credentials stay out of client configs
+---
+
+## Technical details
+
+The sections below are for anyone integrating, auditing, or extending
+`flowmcp` — skip them if you just want to use the CLI.
+
+### How credentials stay out of client configs
 
 For `connect` (`mcp-remote`) orgs, `install` writes:
 
@@ -153,7 +132,21 @@ that point it looks up the token for `acme` from the keychain, exports it as
 exists only in that child process's environment, for the lifetime of the
 MCP session.
 
-## Storage layout
+### JSON contract
+
+`list`/`inspect`/`test`/`debug`/`install`/`remove`/`rename` print JSON
+automatically whenever stdout isn't a real TTY (piped, redirected, or
+invoked by an agent's tool call) — `--json` only matters when you want
+machine output in your own terminal. JSON responses include a `next_steps`
+array naming the follow-up command, when there is an obvious one.
+
+`install`, `remove`, and `rename` are the only commands that touch a real,
+shared client config file (Claude Code/Desktop/Cursor) — the one place here
+where a wrong call has a real blast radius — so all three support `--dry-run`
+to preview the change before it's written, and `remove` requires an explicit
+`--yes` with no interactive fallback.
+
+### Storage layout
 
 ```
 ~/.flowmcp/
@@ -168,7 +161,7 @@ can be freely read, printed, or committed to a private dotfiles repo without
 any risk of exposing a token — never put `secrets/` under version control
 (see `.gitignore`).
 
-## Security model — what this does and doesn't protect against
+### Security model — what this does and doesn't protect against
 
 - Protects against: tokens leaking into an AI agent's conversation
   transcript/logs, tokens sitting in plaintext in versioned config files,
@@ -194,7 +187,7 @@ any risk of exposing a token — never put `secrets/` under version control
   its own `MCP_REMOTE_CONFIG_DIR` and check for the presence of a
   `*_tokens.json` file as a "connected" signal, never reading its contents.
 
-## Extending to other MCP servers
+### Extending to other MCP servers
 
 The design isn't Webflow-specific by construction: `lib/secrets.sh`,
 `lib/profiles.sh`, and `lib/clients.sh` generalize to any provider. The

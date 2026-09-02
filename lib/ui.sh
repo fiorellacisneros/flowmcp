@@ -117,5 +117,5 @@ wfw_banner() {
   else
     echo "flowmcp v$(wfw_version) · by forhuman"
   fi
-  echo "${WFW_C_DIM}agent-safe Webflow MCP connection manager${WFW_C_RESET}"
+  echo "${WFW_C_DIM}$(wfw_t tagline)${WFW_C_RESET}"
 }

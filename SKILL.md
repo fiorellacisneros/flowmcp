@@ -160,6 +160,7 @@ flowmcp remove <org> --yes [--from client:scope]... [--dry-run] [--json]
 flowmcp rename <old-org> <new-org> [--dry-run] [--json]
 flowmcp debug <org> [--json]
 flowmcp schema                           # always JSON — run this first
+flowmcp lang [en|es] [--json]            # view/change human --help language, never affects JSON
 ```
 
 `--json` is implicit whenever stdout isn't a TTY, so you (the agent) get it by
