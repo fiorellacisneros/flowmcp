@@ -130,9 +130,9 @@ wfw_t_es() {
     msg_rename_ok)        echo "'%s' renombrado a '%s' — no hace falta volver a iniciar sesión" ;;
     msg_rename_hint)      echo "reinicia cualquier cliente cuyo config se haya actualizado para que tome el nuevo nombre" ;;
     msg_test_mcpremote_ok) echo "'%s' tiene una sesión de Webflow guardada (mcp-remote)" ;;
-    msg_test_note1)       echo "nota: esto solo verifica que se guardó una sesión, no que siga siendo válida —" ;;
-    msg_test_note2)       echo "un cliente real (Claude Code/Cursor/Claude Desktop) la va a refrescar o" ;;
-    msg_test_note3)       echo "volver a pedir automáticamente la próxima vez que se conecte." ;;
+    msg_test_note1)       echo "nota: esto solo confirma que hay una sesión guardada en tu computadora —" ;;
+    msg_test_note2)       echo "no la prueba contra Webflow todavía. Eso pasa solo, cuando abras Claude Code," ;;
+    msg_test_note3)       echo "Claude Desktop o Cursor: si venció, la renuevan o te piden iniciar sesión de nuevo." ;;
     msg_test_pat_ok)      echo "el token de '%s' es válido · sitios accesibles: %s" ;;
     msg_test_scopes)      echo "permisos: %s" ;;
     msg_test_next_intro)  echo "instálalo en el cliente que uses:" ;;
@@ -207,9 +207,9 @@ wfw_t_en() {
     msg_rename_ok)        echo "renamed '%s' to '%s' — no re-login needed" ;;
     msg_rename_hint)      echo "restart any client whose config was just updated to pick up the rename" ;;
     msg_test_mcpremote_ok) echo "'%s' has a saved Webflow session (mcp-remote)" ;;
-    msg_test_note1)       echo "note: this only checks a session was saved, not that it's still valid —" ;;
-    msg_test_note2)       echo "a real client (Claude Code/Cursor/Claude Desktop) will refresh or" ;;
-    msg_test_note3)       echo "re-prompt automatically the next time it connects." ;;
+    msg_test_note1)       echo "note: this only confirms a session file exists on your computer —" ;;
+    msg_test_note2)       echo "it doesn't check it against Webflow yet. That happens on its own when you" ;;
+    msg_test_note3)       echo "open Claude Code, Claude Desktop, or Cursor: expired sessions refresh or re-prompt automatically." ;;
     msg_test_pat_ok)      echo "token for '%s' is valid · sites accessible: %s" ;;
     msg_test_scopes)      echo "scopes: %s" ;;
     msg_test_next_intro)  echo "install it into whichever client you're using:" ;;
