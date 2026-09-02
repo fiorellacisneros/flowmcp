@@ -66,7 +66,7 @@ wfw_t() {
 wfw_t_es() {
   local key="$1"
   case "$key" in
-    tagline)              echo "administrador de conexiones MCP a Webflow, seguro para agentes" ;;
+    tagline)              echo "conecta Webflow a tu agente de IA, sin exponer tus tokens" ;;
     usage)                echo "USO" ;;
     onboarding)           echo "PRIMEROS PASOS" ;;
     daily_use)            echo "USO DIARIO" ;;
@@ -116,7 +116,7 @@ wfw_t_es() {
 wfw_t_en() {
   local key="$1"
   case "$key" in
-    tagline)              echo "agent-safe Webflow MCP connection manager" ;;
+    tagline)              echo "connects Webflow to your AI agent, without exposing your tokens" ;;
     usage)                echo "USAGE" ;;
     onboarding)           echo "ONBOARDING" ;;
     daily_use)            echo "DAILY USE" ;;
