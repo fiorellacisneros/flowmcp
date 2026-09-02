@@ -1,8 +1,9 @@
 #!/usr/bin/env bash
 # Usage: flowmcp add <org> [--label "Display Name"]
-# Registers profile metadata only. No token handling here — run
-# `flowmcp secret-set <org>` yourself afterwards, in your own
-# terminal, to store the token.
+# Registers profile metadata only, no token handling here. The suggested
+# next step is `flowmcp connect <org>` (browser OAuth, no token to copy);
+# `flowmcp secret-set <org>` is the fallback for headless environments with
+# no browser available.
 
 source "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/../lib/bootstrap.sh"
 
@@ -32,7 +33,11 @@ wfw_audit_log "add" "$org" "ok"
 backend="$(wfw_secret_backend)"
 wfw_say_ok "registered org '$org' (label: $label) · secret backend: $backend"
 echo
-wfw_say_next "$(wfw_t msg_add_run_yourself)"
+wfw_say_next "$(wfw_t msg_add_recommend "$org")"
+echo
+echo "    flowmcp connect $org"
+echo
+echo "$(wfw_t msg_add_no_browser)"
 echo
 echo "    flowmcp secret-set $org"
 echo

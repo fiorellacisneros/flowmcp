@@ -92,6 +92,8 @@ wfw_t_es() {
     msg_connect_opening)  echo "Abriendo tu navegador para que '%s' apruebe el acceso a Webflow..." ;;
     msg_connect_ctrlc1)   echo "En cuanto lo veas conectado abajo, presiona Ctrl+C para volver aquí — tu" ;;
     msg_connect_ctrlc2)   echo "sesión ya queda guardada en disco en ese momento." ;;
+    msg_add_recommend)    echo "primero intenta 'flowmcp connect %s' — inicia sesión por navegador, sin copiar/pegar ningún token" ;;
+    msg_add_no_browser)   echo "¿Sin navegador disponible? Corre esto tú mismo, en tu propia terminal (no a través de un agente):" ;;
     msg_add_run_yourself) echo "corre esto tú mismo, en tu propia terminal (no a través de un agente):" ;;
     msg_add_explain1)     echo "Te va a pedir el token de la API de Webflow con entrada oculta y lo guardará" ;;
     msg_add_explain2)     echo "directamente en %s. El token nunca se pasa como argumento de comando" ;;
@@ -142,6 +144,8 @@ wfw_t_en() {
     msg_connect_opening)  echo "Opening your browser for '%s' to approve access to Webflow..." ;;
     msg_connect_ctrlc1)   echo "Once you see it connect below, press Ctrl+C to return here — your" ;;
     msg_connect_ctrlc2)   echo "session is already saved to disk by that point." ;;
+    msg_add_recommend)    echo "try 'flowmcp connect %s' first — browser login, no token to copy/paste" ;;
+    msg_add_no_browser)   echo "No browser available? Run this yourself, in your own terminal (not through an agent):" ;;
     msg_add_run_yourself) echo "run this yourself, in your own terminal (not through an agent):" ;;
     msg_add_explain1)     echo "It will prompt for the Webflow API token with hidden input and store it" ;;
     msg_add_explain2)     echo "directly in %s. The token is never passed as a command argument" ;;
