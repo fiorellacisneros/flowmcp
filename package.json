@@ -1,6 +1,6 @@
 {
   "name": "@forhuman/flowmcp",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Manage multiple Webflow MCP server connections (one per client/org) without ever letting an API token pass through agent context.",
   "license": "MIT",
   "bin": {
