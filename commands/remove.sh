@@ -57,15 +57,20 @@ if [[ -z "$confirmed" ]]; then
 fi
 
 removed_from=()
+failed_from=()
 for spec in "${froms[@]:-}"; do
   [[ -z "$spec" ]] && continue
   client="${spec%%:*}"
   scope="${spec#*:}"
   config_path="$(wfw_client_config_path "$client" "$scope" 2>/dev/null || true)"
   if [[ -n "$config_path" && -f "$config_path" ]]; then
-    wfw_client_remove_server "$config_path" "webflow-$org"
-    removed_from+=("$config_path")
-    wfw_json_mode "$json_flag" || wfw_say_ok "$(wfw_t msg_remove_stripped "$org" "$config_path")"
+    if wfw_client_remove_server "$config_path" "webflow-$org"; then
+      removed_from+=("$config_path")
+      wfw_json_mode "$json_flag" || wfw_say_ok "$(wfw_t msg_remove_stripped "$org" "$config_path")"
+    else
+      failed_from+=("$config_path")
+      wfw_json_mode "$json_flag" || wfw_say_err "$(wfw_t msg_remove_strip_failed "$org" "$config_path")"
+    fi
   fi
 done
 
@@ -75,8 +80,10 @@ wfw_profile_delete "$org"
 wfw_audit_log "remove" "$org" "ok"
 
 if wfw_json_mode "$json_flag"; then
-  jq -nc --arg org "$org" --argjson removed "$(printf '%s\n' "${removed_from[@]:-}" | jq -R . | jq -sc 'map(select(length>0))')" \
-    '{ok: true, dry_run: false, org: $org, removed_from: $removed}'
+  jq -nc --arg org "$org" \
+    --argjson removed "$(printf '%s\n' "${removed_from[@]:-}" | jq -R . | jq -sc 'map(select(length>0))')" \
+    --argjson failed "$(printf '%s\n' "${failed_from[@]:-}" | jq -R . | jq -sc 'map(select(length>0))')" \
+    '{ok: true, dry_run: false, org: $org, removed_from: $removed, failed_to_strip: $failed}'
 else
   wfw_say_ok "$(wfw_t msg_remove_ok "$org")"
 fi
