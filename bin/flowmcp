@@ -35,7 +35,6 @@ usage() {
   echo "${WFW_C_DIM}$(wfw_t onboarding)${WFW_C_RESET}"
   wfw_cmd_line "connect" "$(wfw_t cmd_connect)"
   wfw_cmd_line "add" "$(wfw_t cmd_add)"
-  wfw_cmd_line "secret-set" "$(wfw_t cmd_secret_set)"
   wfw_cmd_line "rotate" "$(wfw_t cmd_rotate)"
   echo
   echo "${WFW_C_DIM}$(wfw_t daily_use)${WFW_C_RESET}"

@@ -74,7 +74,7 @@ wfw_t_es() {
     security_2)           echo "nunca lo imprime. secret-set/rotate requieren una terminal interactiva real;" ;;
     security_3)           echo "connect abre un navegador real (via mcp-remote, OAuth propio de Webflow — sin apps que configurar)." ;;
     cmd_connect)          echo "<org> [--label NOMBRE] — agrega un cliente por navegador, sin configuración (recomendado)" ;;
-    cmd_add)              echo "<org> [--label NOMBRE] — registra solo los metadatos del org" ;;
+    cmd_add)              echo "<org> [--label NOMBRE] — registra el org, luego pega su token con 'secret-set' (alternativa sin navegador)" ;;
     cmd_secret_set)       echo "<org> — pega un token manualmente (alternativa sin navegador)" ;;
     cmd_rotate)           echo "<org> — reemplaza un token guardado" ;;
     cmd_list)             echo "lista los orgs registrados + último estado de test" ;;
@@ -123,6 +123,7 @@ wfw_t_es() {
     msg_remove_confirm_needed) echo "esto elimina el perfil y el token guardado de '%s'." ;;
     msg_remove_confirm_hint)   echo "vuelve a correrlo con --yes para confirmar" ;;
     msg_remove_stripped)  echo "se quitó 'webflow-%s' de %s" ;;
+    msg_remove_strip_failed) echo "no se pudo quitar 'webflow-%s' de %s — sigue ahí, revísalo a mano" ;;
     msg_remove_ok)        echo "org '%s' eliminado (perfil + credenciales guardadas)" ;;
     msg_install_no_org)   echo "no existe el org '%s' — corre 'flowmcp add %s' o 'connect %s' primero" ;;
     msg_install_ok)       echo "'%s' instalado en %s" ;;
@@ -166,7 +167,7 @@ wfw_t_en() {
     security_2)           echo "never prints one. secret-set/rotate require a real interactive TTY;" ;;
     security_3)           echo "connect opens a real browser (via mcp-remote, Webflow's own OAuth — no app to set up)." ;;
     cmd_connect)          echo "<org> [--label NAME] — add a client via browser, no setup needed (recommended)" ;;
-    cmd_add)              echo "<org> [--label NAME] — register org metadata only" ;;
+    cmd_add)              echo "<org> [--label NAME] — register the org, then paste its token with 'secret-set' (headless alternative)" ;;
     cmd_secret_set)       echo "<org> — paste a token manually (headless fallback)" ;;
     cmd_rotate)           echo "<org> — replace a stored token" ;;
     cmd_list)             echo "list registered orgs + last test status" ;;
@@ -215,6 +216,7 @@ wfw_t_en() {
     msg_remove_confirm_needed) echo "this deletes the profile and the stored token for '%s'." ;;
     msg_remove_confirm_hint)   echo "re-run with --yes to confirm" ;;
     msg_remove_stripped)  echo "removed 'webflow-%s' from %s" ;;
+    msg_remove_strip_failed) echo "could not remove 'webflow-%s' from %s — it's still there, check it by hand" ;;
     msg_remove_ok)        echo "removed org '%s' (profile + stored credentials)" ;;
     msg_install_no_org)   echo "no org '%s' registered — run 'flowmcp add %s' or 'connect %s' first" ;;
     msg_install_ok)       echo "installed '%s' into %s" ;;
