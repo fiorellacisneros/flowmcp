@@ -3,11 +3,26 @@
 Connect every client's Webflow account to your AI agent — one at a time,
 safely, without a token ever touching the conversation.
 
-If you run an agency, you likely need a separate Webflow connection per
-client. `flowmcp` is a CLI (+ a Claude Code skill) that manages all of them
-side by side: add a client in seconds, the token lives only in your OS
-keychain, and your agent can add/list/test/install connections on your
-behalf — but can never see, hold, or print the token itself.
+## The problem
+
+Webflow's MCP server only lets you connect to one site's workspace at a
+time. If you're a freelancer or run an agency, that means constantly
+disconnecting and reconnecting whenever you switch between clients — and
+every manual setup is another chance to paste a token somewhere it
+shouldn't be (a config file, a screenshot, an agent's context).
+
+## How it works
+
+`flowmcp` is a CLI (+ a Claude Code skill) that registers one isolated
+connection per client, side by side — switching clients is just naming a
+different connection, nothing to disconnect. Under the hood:
+
+- Registers one **profile** per client (label, metadata — no secret).
+- Stores the actual token in your **OS keychain**, never in a client config
+  file, never in an agent's context.
+- Lets an AI agent drive the whole workflow (add, list, test, install,
+  debug) except the two commands that touch a token — those require you,
+  in your own terminal, by design.
 
 ## Install
 
@@ -47,15 +62,6 @@ fmcp install acme claude-code --scope project
 The first time a human runs `flowmcp` interactively, it asks once whether to
 show help text in English or Español, and remembers it
 (`flowmcp lang es` changes it later; JSON output is unaffected either way).
-
-## What it does
-
-- Registers one **profile** per client (label, metadata — no secret).
-- Stores the actual token in your **OS keychain**, never in a client config
-  file, never in an agent's context.
-- Lets an AI agent drive the whole workflow (add, list, test, install,
-  debug) except the two commands that touch a token — those require you,
-  in your own terminal, by design.
 
 ## Commands
 
