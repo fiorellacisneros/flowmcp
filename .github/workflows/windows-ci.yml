@@ -43,9 +43,13 @@ jobs:
           command -v powershell.exe
 
       - name: npm pack + global install from tarball
+        # package.json's "os" field intentionally still excludes win32 (see
+        # workflow purpose) — --force bypasses npm's EBADPLATFORM check so
+        # this job can prove the underlying cmd-shim/script logic works
+        # before that field is flipped for real users in a follow-up.
         run: |
           npm pack
-          npm install -g "$(ls forhuman-flowmcp-*.tgz)"
+          npm install -g "$(ls forhuman-flowmcp-*.tgz)" --force
 
       - name: flowmcp is on PATH and runs via the npm cmd-shim
         run: |
