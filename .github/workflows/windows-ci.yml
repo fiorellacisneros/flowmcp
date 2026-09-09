@@ -1,0 +1,114 @@
+name: Windows CI
+
+on:
+  pull_request:
+    paths:
+      - "bin/**"
+      - "lib/**"
+      - "commands/**"
+      - "package.json"
+      - ".github/workflows/windows-ci.yml"
+  push:
+    branches: [main]
+    paths:
+      - "bin/**"
+      - "lib/**"
+      - "commands/**"
+  workflow_dispatch: {}
+
+jobs:
+  windows-smoke:
+    runs-on: windows-latest
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Install jq (not bundled with Git for Windows)
+        run: choco install jq -y --no-progress
+        shell: pwsh
+
+      - name: Verify prerequisites resolvable from Git Bash
+        run: |
+          command -v bash
+          command -v jq
+          command -v curl
+          command -v node
+          command -v npx
+          command -v powershell.exe
+
+      - name: npm pack + global install from tarball
+        # package.json's "os" field intentionally still excludes win32 (see
+        # workflow purpose) — --force bypasses npm's EBADPLATFORM check so
+        # this job can prove the underlying cmd-shim/script logic works
+        # before that field is flipped for real users in a follow-up.
+        run: |
+          npm pack
+          npm install -g "$(ls forhuman-flowmcp-*.tgz)" --force
+
+      - name: flowmcp is on PATH and runs via the npm cmd-shim
+        run: |
+          which flowmcp
+          flowmcp --help
+
+      - name: add (non-interactive org registration)
+        run: flowmcp add ci-test-org --label "CI Test Org"
+
+      - name: dpapi-file secret backend round-trip
+        # secret-set.sh correctly hard-refuses non-TTY stdin by design, so
+        # this calls the backend functions directly to prove the Windows
+        # DPAPI round-trip instead of going through the interactive command.
+        run: |
+          source lib/bootstrap.sh
+          fake_token="ci-dummy-token-value"
+          wfw_secret_set ci-test-org fake_token
+          backend="$(wfw_secret_backend)"
+          [[ "$backend" == "dpapi-file" ]] || { echo "expected dpapi-file backend, got: $backend"; exit 1; }
+          retrieved="$(wfw_secret_get ci-test-org)"
+          [[ "$retrieved" == "ci-dummy-token-value" ]] || { echo "round-trip mismatch"; exit 1; }
+          wfw_secret_exists ci-test-org || { echo "exists check failed"; exit 1; }
+
+      - name: list
+        run: flowmcp list --json
+
+      - name: test (dummy token — proves the curl path runs, not that auth succeeds)
+        run: flowmcp test ci-test-org --json || true
+
+      - name: install into all three clients
+        run: |
+          flowmcp install ci-test-org claude-code --json
+          flowmcp install ci-test-org claude-desktop --json
+          flowmcp install ci-test-org cursor --json
+
+      - name: assert claude-desktop config landed at the real Windows path with an invocable command
+        run: |
+          config_path="$(cygpath -u "$APPDATA")/Claude/claude_desktop_config.json"
+          test -f "$config_path"
+          jq -e '.mcpServers["webflow-ci-test-org"].command | test("bash(\\.exe)?$")' "$config_path"
+
+      - name: debug
+        run: flowmcp debug ci-test-org --json || true
+
+      - name: rename
+        run: flowmcp rename ci-test-org ci-test-org-renamed
+
+      - name: remove (cleanup, also exercises dpapi-file delete)
+        run: |
+          flowmcp remove ci-test-org-renamed --yes \
+            --from claude-code:user --from claude-desktop:user --from cursor:user
+          source lib/bootstrap.sh
+          if wfw_secret_exists ci-test-org-renamed; then
+            echo "secret was not deleted"
+            exit 1
+          fi
+
+      - name: syntax-check every script under Git Bash
+        run: |
+          for f in bin/flowmcp lib/*.sh commands/*.sh; do
+            bash -n "$f"
+          done

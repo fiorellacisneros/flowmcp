@@ -11,6 +11,18 @@ wfw_os() {
   esac
 }
 
+# wfw_to_posix_path <path> — normalizes a Windows-style or mixed-style path
+# (e.g. $APPDATA under Git Bash, which is native "C:\Users\..." form) to
+# POSIX form so bash builtins and jq handle it safely. No-op on macOS/Linux.
+wfw_to_posix_path() {
+  local p="$1"
+  if command -v cygpath >/dev/null 2>&1; then
+    cygpath -u "$p"
+  else
+    printf '%s' "$p" | sed -E 's#^([A-Za-z]):#/\L\1#; s#\\#/#g'
+  fi
+}
+
 # wfw_client_config_path <client> <scope>
 # client: claude-code | claude-desktop | cursor
 # scope:  user | project   (project scope resolves relative to $PWD)
@@ -33,7 +45,7 @@ wfw_client_config_path() {
       case "$os" in
         macos) echo "$HOME/Library/Application Support/Claude/claude_desktop_config.json" ;;
         linux) echo "$HOME/.config/Claude/claude_desktop_config.json" ;;
-        windows) echo "$APPDATA/Claude/claude_desktop_config.json" ;;
+        windows) echo "$(wfw_to_posix_path "${APPDATA:?APPDATA not set}")/Claude/claude_desktop_config.json" ;;
         *) echo "error: unsupported OS for claude-desktop" >&2; return 1 ;;
       esac
       ;;
@@ -94,7 +106,19 @@ wfw_build_server_json() {
   else
     local run_mcp_path="$WFW_COMMANDS_DIR/run-mcp.sh"
     chmod +x "$run_mcp_path" 2>/dev/null || true
-    jq -n --arg cmd "$run_mcp_path" --arg org "$org" '{command: $cmd, args: [$org]}'
+    if [[ "$(wfw_os)" == "windows" ]]; then
+      # Native Win32 clients (Claude Desktop, Cursor) call CreateProcess
+      # directly and don't honor a #!/usr/bin/env bash shebang — point
+      # command at bash.exe itself and pass the script as an arg.
+      local bash_exe
+      bash_exe="$(command -v bash.exe || command -v bash)"
+      jq -n --arg cmd "$bash_exe" \
+            --arg script "$(cygpath -w "$run_mcp_path" 2>/dev/null || echo "$run_mcp_path")" \
+            --arg org "$org" \
+        '{command: $cmd, args: [$script, $org]}'
+    else
+      jq -n --arg cmd "$run_mcp_path" --arg org "$org" '{command: $cmd, args: [$org]}'
+    fi
   fi
 }
 

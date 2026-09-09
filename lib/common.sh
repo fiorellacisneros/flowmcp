@@ -23,10 +23,13 @@ wfw_ensure_dirs() {
 wfw_mcp_remote_dir() { echo "$WFW_MCP_REMOTE_BASE_DIR/$1"; }
 
 wfw_require_jq() {
-  command -v jq >/dev/null 2>&1 || {
+  command -v jq >/dev/null 2>&1 && return 0
+  if [[ "$(wfw_os)" == "windows" ]]; then
+    echo "error: jq is required but not installed. Install with: winget install jqlang.jq (or: choco install jq / scoop install jq)" >&2
+  else
     echo "error: jq is required but not installed (https://jqlang.org)" >&2
-    exit 1
-  }
+  fi
+  exit 1
 }
 
 wfw_require_curl() {
