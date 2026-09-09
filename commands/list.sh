@@ -15,7 +15,7 @@ if wfw_json_mode "$json_flag"; then
     echo "[]"
     exit 0
   fi
-  jq -sc '.' <(for org in "${orgs[@]}"; do wfw_profile_read "$org"; done)
+  for org in "${orgs[@]}"; do wfw_profile_read "$org"; done | jq -sc '.'
   exit 0
 fi
 
