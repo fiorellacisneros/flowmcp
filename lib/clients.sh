@@ -101,8 +101,8 @@ wfw_build_server_json() {
   if [[ "$auth_method" == "mcp-remote" ]]; then
     local remote_dir
     remote_dir="$(wfw_mcp_remote_dir "$org")"
-    jq -n --arg url "$WFW_MCP_URL" --arg dir "$remote_dir" \
-      '{command: "npx", args: ["-y", "mcp-remote", $url, "--resource", $url], env: {MCP_REMOTE_CONFIG_DIR: $dir}}'
+    jq -n --arg url "$WFW_MCP_URL" --arg dir "$remote_dir" --arg pkg "mcp-remote@$WFW_MCP_REMOTE_VERSION" \
+      '{command: "npx", args: ["-y", $pkg, $url, "--resource", $url], env: {MCP_REMOTE_CONFIG_DIR: $dir}}'
   else
     local run_mcp_path="$WFW_COMMANDS_DIR/run-mcp.sh"
     chmod +x "$run_mcp_path" 2>/dev/null || true

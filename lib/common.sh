@@ -12,6 +12,19 @@ WFW_MCP_REMOTE_BASE_DIR="$WFW_HOME/mcp-remote"   # per-org isolated mcp-remote t
 WFW_KEYCHAIN_SERVICE="flowmcp"
 WFW_MCP_URL="https://mcp.webflow.com/mcp"        # Webflow's official hosted MCP server
 
+# Pinned, not "mcp-remote@latest" via bare `npx -y mcp-remote`: mcp-remote
+# already coordinates multiple concurrent instances for the same server
+# (a leader/follower handoff over the local OAuth callback port — see its
+# createLazyAuthCoordinator), which is exactly what stops the "browser tab
+# storm + ERR_CONNECTION_REFUSED" failure mode this tool is prone to when
+# several client sessions/reconnects each hold their own long-lived
+# instance. That coordination only works if every concurrent instance
+# speaks the same protocol version, so an unpinned "latest" resolved at a
+# different moment for each launch can put an old and a new instance next
+# to each other with no way to agree on who's the leader. Pinning removes
+# that mismatch. Bump deliberately, not silently, when there's a reason to.
+WFW_MCP_REMOTE_VERSION="0.14.2"
+
 wfw_ensure_dirs() {
   umask 077
   mkdir -p "$WFW_PROFILES_DIR" "$WFW_SECRETS_DIR" "$WFW_AUDIT_DIR" "$WFW_MCP_REMOTE_BASE_DIR"
