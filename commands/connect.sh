@@ -45,7 +45,7 @@ wfw_t msg_connect_ctrlc2
 echo
 
 trap '' INT   # let mcp-remote (child) react to Ctrl+C; don't let it kill this script too
-MCP_REMOTE_CONFIG_DIR="$remote_dir" npx -y mcp-remote "$WFW_MCP_URL" --resource "$WFW_MCP_URL" || true
+MCP_REMOTE_CONFIG_DIR="$remote_dir" npx -y "mcp-remote@$WFW_MCP_REMOTE_VERSION" "$WFW_MCP_URL" --resource "$WFW_MCP_URL" || true
 trap - INT
 
 if wfw_mcp_remote_connected "$org"; then
