@@ -181,6 +181,10 @@ if [[ -z "$skip_write" ]]; then
   wfw_client_merge_server "$config_path" "$server_name" "$server_json" "$force"
 fi
 
+if [[ "$scope" == "project" ]]; then
+  wfw_profile_record_install "$org" "$client" "$config_path"
+fi
+
 removed_global=false
 if [[ -n "$do_remove_global" ]]; then
   wfw_client_remove_server "$global_path" "$server_name"

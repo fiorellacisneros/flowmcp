@@ -56,3 +56,15 @@ wfw_profile_list() {
   done
   shopt -u nullglob
 }
+
+# wfw_profile_record_install <org> <client> <config-path> — remember a
+# folder-scoped install, so `list` (and `rename`) can find it from any folder.
+# Metadata only, like the rest of the profile.
+wfw_profile_record_install() {
+  local org="$1" client="$2" path="$3" p tmp
+  p="$(wfw_profile_path "$org")"
+  tmp="$(mktemp)"
+  jq --arg c "$client" --arg path "$path" \
+    '.project_installs = (((.project_installs // []) | map(select(.path != $path))) + [{client: $c, path: $path}])' \
+    "$p" > "$tmp" && mv "$tmp" "$p"
+}

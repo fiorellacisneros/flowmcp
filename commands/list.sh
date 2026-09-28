@@ -25,6 +25,21 @@ if [[ ${#orgs[@]} -eq 0 ]]; then
   exit 0
 fi
 
+# Folder installs made before the profile recorded them (e.g. by 0.3.0) are
+# learned the first time list sees them, so later runs find them from anywhere.
+sync_recorded() {
+  local org="$1" ents="$2" ent client rest path
+  while IFS= read -r ent; do
+    [[ "$ent" == *:project:* ]] || continue
+    client="${ent%%:*}"
+    rest="${ent#*:}"
+    path="${rest#project:}"
+    if ! jq -e --arg p "$path" '(.project_installs // []) | any(.path == $p)' "$(wfw_profile_path "$org")" >/dev/null 2>&1; then
+      wfw_profile_record_install "$org" "$client" "$path"
+    fi
+  done <<<"$ents"
+}
+
 # states: working | expired | failed | no_session | no_response | saved
 states=()
 auths=()
@@ -88,9 +103,12 @@ if wfw_json_mode "$json_flag"; then
   for (( i = 0; i < ${#orgs[@]}; i++ )); do
     org="${orgs[i]}"
     if [[ "${states[i]}" == "no_session" ]]; then has=false; else has=true; fi
-    installed="$(wfw_org_installed_in "$org" | jq -R . | jq -sc .)"
+    ents="$(wfw_org_installed_in "$org")"
+    sync_recorded "$org" "$ents"
+    installed_at="$(printf '%s\n' "$ents" | jq -R -s -c 'split("\n") | map(select(length > 0) | split(":") | {client: .[0], scope: .[1], path: (if length > 2 then (.[2:] | join(":")) else null end)})')"
     wfw_profile_read "$org" | jq -c --arg status "${states[i]}" --argjson session "$has" \
-      --argjson installed_in "$installed" '. + {status: $status, session: $session, installed_in: $installed_in}'
+      --argjson at "$installed_at" \
+      '. + {status: $status, session: $session, installed_in: ($at | map("\(.client):\(.scope)") | unique), installed_at: $at}'
   done | jq -sc '.'
   exit 0
 fi
@@ -131,12 +149,19 @@ for (( i = 0; i < ${#orgs[@]}; i++ )); do
   distinct=""
   ndistinct=0
   ents="$(wfw_org_installed_in "$org")"
+  sync_recorded "$org" "$ents"
   while IFS= read -r ent; do
     [[ -n "$ent" ]] || continue
     client="${ent%%:*}"
-    scope="${ent##*:}"
+    rest="${ent#*:}"
+    scope="${rest%%:*}"
     disp="$client"
-    if [[ "$scope" == "project" ]]; then disp="$client:project"; fi
+    if [[ "$scope" == "project" ]]; then
+      folder="$(dirname "${rest#project:}")"
+      if [[ "$(basename "$folder")" == ".cursor" ]]; then folder="$(dirname "$folder")"; fi
+      if [[ "$folder" == "$HOME"* ]]; then folder="~${folder#"$HOME"}"; fi
+      disp="$client ($folder)"
+    fi
     inst_text="${inst_text:+$inst_text, }$disp"
     case ",$distinct," in
       *",$client,"*) ;;

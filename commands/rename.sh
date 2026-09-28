@@ -49,6 +49,17 @@ for spec in "claude-code:user" "claude-code:project" "claude-desktop:user" "curs
   would_update+=("$path")
 done
 
+# folders this org was installed into (recorded by `install`), wherever they are
+recorded="$(jq -r '(.project_installs // [])[].path' "$(wfw_profile_path "$old")" 2>/dev/null || true)"
+while IFS= read -r path; do
+  [[ -n "$path" && -f "$path" ]] || continue
+  jq empty "$path" >/dev/null 2>&1 || continue
+  [[ -n "$(jq -r --arg n "webflow-$old" '.mcpServers[$n] // empty' "$path")" ]] || continue
+  dup=""
+  for u in "${would_update[@]:-}"; do [[ "$u" == "$path" ]] && dup="1"; done
+  [[ -n "$dup" ]] || would_update+=("$path")
+done <<<"$recorded"
+
 if [[ -n "$dry_run" ]]; then
   if wfw_json_mode "$json_flag"; then
     jq -nc --arg old "$old" --arg new "$new" \

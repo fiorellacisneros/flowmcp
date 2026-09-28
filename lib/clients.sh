@@ -133,20 +133,37 @@ wfw_build_server_json() {
   fi
 }
 
-# wfw_org_installed_in <org> — one "client:scope" line for every client
-# config that currently has a webflow-<org> entry. User scope is always
-# checked; project scope only for the current directory ($PWD).
+# wfw_org_installed_in <org> — one line per client config that has a
+# webflow-<org> entry: "client:user" for a global config, "client:project:<path>"
+# for a folder. Checks the global configs, the current folder, and every folder
+# recorded in the profile by a previous `install` (so it works from anywhere).
 wfw_org_installed_in() {
-  local org="$1" client scope path
+  local org="$1" client scope path seen="|" rec c p
   for client in claude-code claude-desktop cursor; do
     for scope in user project; do
       path="$(wfw_client_config_path "$client" "$scope" 2>/dev/null)" || continue
       [[ -f "$path" ]] || continue
       if jq -e --arg n "webflow-$org" '.mcpServers[$n] // empty' "$path" >/dev/null 2>&1; then
-        echo "$client:$scope"
+        if [[ "$scope" == "project" ]]; then
+          echo "$client:project:$path"
+          seen="$seen$path|"
+        else
+          echo "$client:user"
+        fi
       fi
     done
   done
+  rec=""
+  if [[ -f "$(wfw_profile_path "$org")" ]]; then
+    rec="$(jq -r '(.project_installs // [])[] | [.client, .path] | @tsv' "$(wfw_profile_path "$org")" 2>/dev/null || true)"
+  fi
+  while IFS=$'\t' read -r c p; do
+    [[ -n "$p" && "$seen" != *"|$p|"* && -f "$p" ]] || continue
+    if jq -e --arg n "webflow-$org" '.mcpServers[$n] // empty' "$p" >/dev/null 2>&1; then
+      echo "$c:project:$p"
+      seen="$seen$p|"
+    fi
+  done <<<"$rec"
   return 0
 }
 
