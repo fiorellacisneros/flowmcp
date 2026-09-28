@@ -115,9 +115,25 @@ if [[ -n "$dry_run" ]]; then
   exit 0
 fi
 
+# Already installed exactly like this? Then there is nothing to change, and that
+# is not an error. Present but different (usually written by an older version)
+# still needs --force to overwrite.
+skip_write=""
+if [[ -f "$config_path" ]]; then
+  existing="$(jq -c --arg n "$server_name" '.mcpServers[$n] // empty' "$config_path" 2>/dev/null || true)"
+  if [[ -n "$existing" ]]; then
+    if [[ "$(jq -cS . <<<"$existing")" == "$(jq -cS . <<<"$server_json")" ]]; then
+      skip_write="1"
+    elif [[ -z "$force" ]]; then
+      install_fail "$(wfw_t msg_install_differs "$server_name" "$config_path")" "$(wfw_t msg_install_differs_hint)" \
+        "$(jq -nc --arg o "$org" --arg c "$client" --arg s "$scope" '["flowmcp install \($o) \($c) --scope \($s) --force"]')"
+    fi
+  fi
+fi
+
 # One org, one client: two processes of the same org renew its Webflow login
 # at the same moment and one of them destroys the session.
-if [[ -z "$allow_multi" ]]; then
+if [[ -z "$allow_multi" && -z "$skip_write" ]]; then
   others="$(wfw_org_installed_in "$org" | cut -d: -f1 | sort -u | grep -vx "$client" | paste -s -d, - | sed 's/,/, /g' || true)"
   if [[ -n "$others" ]]; then
     install_fail "$(wfw_t msg_install_multi "$org" "$others")" "$(wfw_t msg_install_multi_hint)" \
@@ -136,7 +152,7 @@ if [[ "$scope" == "project" && "$client" != "claude-desktop" ]]; then
   fi
 fi
 
-if ! wfw_json_mode "$json_flag"; then
+if [[ -z "$skip_write" ]] && ! wfw_json_mode "$json_flag"; then
   if [[ "$scope" == "project" ]]; then
     echo "${WFW_C_DIM}$(wfw_t msg_install_plan_project "$config_path" "$client" "$org")${WFW_C_RESET}"
   else
@@ -161,31 +177,41 @@ if [[ -n "$global_path" ]]; then
   fi
 fi
 
-wfw_client_merge_server "$config_path" "$server_name" "$server_json" "$force"
+if [[ -z "$skip_write" ]]; then
+  wfw_client_merge_server "$config_path" "$server_name" "$server_json" "$force"
+fi
 
 removed_global=false
 if [[ -n "$do_remove_global" ]]; then
   wfw_client_remove_server "$global_path" "$server_name"
   removed_global=true
 fi
-wfw_audit_log "install" "$org" "ok" "client=$client scope=$scope path=$config_path auth=$auth_method removed_global=$removed_global"
+wfw_audit_log "install" "$org" "ok" "client=$client scope=$scope path=$config_path auth=$auth_method removed_global=$removed_global unchanged=${skip_write:-0}"
 
 if wfw_json_mode "$json_flag"; then
   notes="[]"
   if [[ -n "$global_hint" ]]; then
     notes="$(jq -nc --arg p "$global_path" '["also installed in the global config (\($p)); run again with --remove-global to keep it only in this folder"]')"
   fi
+  if [[ -n "$skip_write" ]]; then changed=false; else changed=true; fi
   jq -nc --arg org "$org" --arg client "$client" --arg scope "$scope" --arg path "$config_path" \
     --arg name "$server_name" --argjson removed_global "$removed_global" --argjson notes "$notes" \
-    '{ok: true, dry_run: false, org: $org, client: $client, scope: $scope, path: $path, server_name: $name,
+    --argjson changed "$changed" \
+    '{ok: true, dry_run: false, changed: $changed, org: $org, client: $client, scope: $scope, path: $path, server_name: $name,
       removed_global: $removed_global, notes: $notes,
       next_steps: ["restart \($client) to pick up the new server", "flowmcp list"]}'
 else
-  wfw_say_ok "$(wfw_t msg_install_ok "$server_name" "$config_path")"
+  if [[ -n "$skip_write" ]]; then
+    wfw_say_ok "$(wfw_t msg_install_already "$server_name" "$config_path")"
+  else
+    wfw_say_ok "$(wfw_t msg_install_ok "$server_name" "$config_path")"
+  fi
   if [[ -n "$do_remove_global" ]]; then wfw_say_ok "$(wfw_t msg_install_global_removed "$global_path")"; fi
   if [[ -n "$global_hint" ]]; then
     wfw_say_warn "$(wfw_t msg_install_global_found "$global_path")"
     wfw_say_hint "$(wfw_t msg_install_global_hint)"
   fi
-  echo "${WFW_C_DIM}($note — $(wfw_t msg_install_restart "$client"))${WFW_C_RESET}"
+  if [[ -z "$skip_write" ]]; then
+    echo "${WFW_C_DIM}($note — $(wfw_t msg_install_restart "$client"))${WFW_C_RESET}"
+  fi
 fi

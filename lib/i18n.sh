@@ -154,6 +154,9 @@ wfw_t_es() {
     msg_install_global_ask) echo "¿quitarlo de la config global y dejarlo solo en esta carpeta? (s/N) " ;;
     msg_install_global_removed) echo "quitado de la config global (%s)" ;;
     msg_install_global_hint) echo "para dejarlo solo en esta carpeta, vuelve a correr con --remove-global" ;;
+    msg_install_already)  echo "'%s' ya está instalado en %s — no hay nada que cambiar." ;;
+    msg_install_differs)  echo "'%s' ya existe en %s con otra configuración (probablemente de una versión anterior)." ;;
+    msg_install_differs_hint) echo "para actualizarlo, vuelve a correr con --force" ;;
     msg_install_unsupported_short) echo "'%s' todavía no es un cliente soportado (claude-code, claude-desktop, cursor)" ;;
     msg_install_unsupported) echo "'%s' todavía no está soportado por 'flowmcp install' (soportados: claude-code, claude-desktop, cursor). Puedes pegar esta entrada a mano en su config de MCP:" ;;
     msg_install_unsupported_json) echo "JSON (clave mcpServers):" ;;
@@ -277,6 +280,9 @@ wfw_t_en() {
     msg_install_global_ask) echo "remove it from the global config and keep it only in this folder? (y/N) " ;;
     msg_install_global_removed) echo "removed from the global config (%s)" ;;
     msg_install_global_hint) echo "to keep it only in this folder, run again with --remove-global" ;;
+    msg_install_already)  echo "'%s' is already installed in %s — nothing to change." ;;
+    msg_install_differs)  echo "'%s' already exists in %s with a different configuration (probably from an older version)." ;;
+    msg_install_differs_hint) echo "to update it, run again with --force" ;;
     msg_install_unsupported_short) echo "'%s' is not a supported client yet (claude-code, claude-desktop, cursor)" ;;
     msg_install_unsupported) echo "'%s' is not supported by 'flowmcp install' yet (supported: claude-code, claude-desktop, cursor). You can paste this entry into its MCP config by hand:" ;;
     msg_install_unsupported_json) echo "JSON (mcpServers key):" ;;
