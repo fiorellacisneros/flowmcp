@@ -81,9 +81,9 @@ jobs:
 
       - name: install into all three clients
         run: |
-          flowmcp install ci-test-org claude-code --json
-          flowmcp install ci-test-org claude-desktop --json
-          flowmcp install ci-test-org cursor --json
+          flowmcp install ci-test-org claude-code --allow-multiple-clients --json
+          flowmcp install ci-test-org claude-desktop --allow-multiple-clients --json
+          flowmcp install ci-test-org cursor --allow-multiple-clients --json
 
       - name: assert claude-desktop config landed at the real Windows path with an invocable command
         run: |
@@ -100,7 +100,7 @@ jobs:
       - name: remove (cleanup, also exercises dpapi-file delete)
         run: |
           flowmcp remove ci-test-org-renamed --yes \
-            --from claude-code:user --from claude-desktop:user --from cursor:user
+            --from claude-code:project --from claude-desktop:user --from cursor:project
           source lib/bootstrap.sh
           if wfw_secret_exists ci-test-org-renamed; then
             echo "secret was not deleted"
