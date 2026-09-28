@@ -50,7 +50,7 @@ jq -nc --arg version "$(wfw_version)" '
       mutates: false,
       requires_tty: false,
       description: "List registered orgs with whether each works right now (checked against Webflow; --fast only checks for a saved login) and the clients each is installed in.",
-      output: {shape: "array", item: "profile + status (working|expired|failed|no_session|no_response|saved) + session (bool: a login is saved) + installed_in (array of client:scope)"}
+      output: {shape: "array", item: "profile + status (working|expired|failed|no_session|no_response|saved) + session (bool: a login is saved) + installed_in (array of client:scope) + installed_at (array of {client, scope, path})"}
     },
     {
       name: "inspect",
