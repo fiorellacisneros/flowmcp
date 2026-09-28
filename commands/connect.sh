@@ -35,6 +35,7 @@ if [[ "${1:-}" == "--missing" ]]; then
     reply=""
     read -r reply || reply="q"
     if [[ "$reply" == "q" || "$reply" == "Q" ]]; then break; fi
+    if [[ "$reply" == "s" || "$reply" == "S" ]]; then continue; fi
     bash "$WFW_COMMANDS_DIR/connect.sh" "$candidate" || true
     echo
   done

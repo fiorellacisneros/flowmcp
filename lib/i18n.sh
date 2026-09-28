@@ -131,7 +131,7 @@ wfw_t_es() {
     msg_connect_success)  echo "'%s' conectado vía OAuth de Webflow" ;;
     msg_connect_next)     echo "entra a la carpeta de tu cliente y corre: flowmcp install %s claude-code" ;;
     msg_connect_missing_list) echo "orgs sin sesión: %s — los conecto de a uno." ;;
-    msg_connect_missing_next) echo "Enter para conectar '%s', q para salir: " ;;
+    msg_connect_missing_next) echo "Enter para conectar '%s', s para saltarlo, q para salir: " ;;
     msg_connect_none_missing) echo "todos los orgs de OAuth tienen sesión guardada." ;;
     msg_connect_fail)     echo "no se encontró una sesión completa para '%s' — puede que el login no haya terminado" ;;
     msg_connect_fail_hint) echo "corre 'flowmcp connect %s' de nuevo y espera a que muestre conectado" ;;
@@ -257,7 +257,7 @@ wfw_t_en() {
     msg_connect_success)  echo "connected '%s' via Webflow's OAuth" ;;
     msg_connect_next)     echo "go to your client's folder and run: flowmcp install %s claude-code" ;;
     msg_connect_missing_list) echo "orgs without a session: %s — connecting them one at a time." ;;
-    msg_connect_missing_next) echo "Enter to connect '%s', q to quit: " ;;
+    msg_connect_missing_next) echo "Enter to connect '%s', s to skip it, q to quit: " ;;
     msg_connect_none_missing) echo "every OAuth org has a saved session." ;;
     msg_connect_fail)     echo "no completed session found for '%s' — the login may not have finished" ;;
     msg_connect_fail_hint) echo "run 'flowmcp connect %s' again and wait until it shows connected" ;;
