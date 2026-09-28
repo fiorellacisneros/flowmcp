@@ -68,6 +68,9 @@ case "$cmd" in
   run-mcp)
     exec "$WFW_COMMANDS_DIR/run-mcp.sh" "$@"
     ;;
+  run-mcp-remote)
+    exec "$WFW_COMMANDS_DIR/run-mcp-remote.sh" "$@"
+    ;;
   -h|--help|help)
     usage
     ;;

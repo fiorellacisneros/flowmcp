@@ -94,31 +94,42 @@ wfw_client_merge_server() {
     "$config_path" > "$tmp" && mv "$tmp" "$config_path"
 }
 
+# wfw_wrapper_server_json <script_path> <org> — {command, args} for an
+# mcpServers entry that runs one of our own launcher scripts with <org> as
+# its only argument. Native Win32 clients (Claude Desktop, Cursor) call
+# CreateProcess directly and don't honor a #!/usr/bin/env bash shebang, so on
+# Windows this points command at bash.exe and passes the script as an arg.
+wfw_wrapper_server_json() {
+  local script_path="$1" org="$2"
+  chmod +x "$script_path" 2>/dev/null || true
+  if [[ "$(wfw_os)" == "windows" ]]; then
+    local bash_exe
+    bash_exe="$(command -v bash.exe || command -v bash)"
+    jq -n --arg cmd "$bash_exe" \
+          --arg script "$(cygpath -w "$script_path" 2>/dev/null || echo "$script_path")" \
+          --arg org "$org" \
+      '{command: $cmd, args: [$script, $org]}'
+  else
+    jq -n --arg cmd "$script_path" --arg org "$org" '{command: $cmd, args: [$org]}'
+  fi
+}
+
 # wfw_build_server_json <org> <auth_method> — the mcpServers entry for an
 # org, shared by install.sh and rename.sh so both stay in sync.
 wfw_build_server_json() {
   local org="$1" auth_method="$2"
   if [[ "$auth_method" == "mcp-remote" ]]; then
-    local remote_dir
-    remote_dir="$(wfw_mcp_remote_dir "$org")"
-    jq -n --arg url "$WFW_MCP_URL" --arg dir "$remote_dir" --arg pkg "mcp-remote@$WFW_MCP_REMOTE_VERSION" \
-      '{command: "npx", args: ["-y", $pkg, $url, "--resource", $url], env: {MCP_REMOTE_CONFIG_DIR: $dir}}'
-  else
-    local run_mcp_path="$WFW_COMMANDS_DIR/run-mcp.sh"
-    chmod +x "$run_mcp_path" 2>/dev/null || true
+    # Launched through our guardian (see commands/run-mcp-remote.sh), never
+    # `npx mcp-remote` directly: a client-launched process must not be able to
+    # open browser tabs. On macOS/Linux the entry is just `flowmcp` + the org
+    # name — no path from this machine — so it also works in a shared folder.
     if [[ "$(wfw_os)" == "windows" ]]; then
-      # Native Win32 clients (Claude Desktop, Cursor) call CreateProcess
-      # directly and don't honor a #!/usr/bin/env bash shebang — point
-      # command at bash.exe itself and pass the script as an arg.
-      local bash_exe
-      bash_exe="$(command -v bash.exe || command -v bash)"
-      jq -n --arg cmd "$bash_exe" \
-            --arg script "$(cygpath -w "$run_mcp_path" 2>/dev/null || echo "$run_mcp_path")" \
-            --arg org "$org" \
-        '{command: $cmd, args: [$script, $org]}'
+      wfw_wrapper_server_json "$WFW_COMMANDS_DIR/run-mcp-remote.sh" "$org"
     else
-      jq -n --arg cmd "$run_mcp_path" --arg org "$org" '{command: $cmd, args: [$org]}'
+      jq -n --arg org "$org" '{command: "flowmcp", args: ["run-mcp-remote", $org]}'
     fi
+  else
+    wfw_wrapper_server_json "$WFW_COMMANDS_DIR/run-mcp.sh" "$org"
   fi
 }
 
