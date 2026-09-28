@@ -122,6 +122,23 @@ wfw_build_server_json() {
   fi
 }
 
+# wfw_org_installed_in <org> — one "client:scope" line for every client
+# config that currently has a webflow-<org> entry. User scope is always
+# checked; project scope only for the current directory ($PWD).
+wfw_org_installed_in() {
+  local org="$1" client scope path
+  for client in claude-code claude-desktop cursor; do
+    for scope in user project; do
+      path="$(wfw_client_config_path "$client" "$scope" 2>/dev/null)" || continue
+      [[ -f "$path" ]] || continue
+      if jq -e --arg n "webflow-$org" '.mcpServers[$n] // empty' "$path" >/dev/null 2>&1; then
+        echo "$client:$scope"
+      fi
+    done
+  done
+  return 0
+}
+
 wfw_client_remove_server() {
   local config_path="$1" server_name="$2" tmp
   [[ -f "$config_path" ]] || return 0
