@@ -14,10 +14,10 @@ jq -nc --arg version "$(wfw_version)" '
   commands: [
     {
       name: "connect",
-      usage: "connect <org> [--label NAME]",
+      usage: "connect <org> [--label NAME] | connect --missing",
       mutates: true,
       requires_tty: true,
-      description: "Add/reconnect an org via browser OAuth (mcp-remote, no setup needed).",
+      description: "Add/reconnect an org via browser OAuth (mcp-remote, no setup needed). --missing signs in every OAuth org that has no saved session, one at a time.",
       output: null
     },
     {
