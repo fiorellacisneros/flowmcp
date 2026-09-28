@@ -70,13 +70,13 @@ jq -nc --arg version "$(wfw_version)" '
     },
     {
       name: "install",
-      usage: "install <org> <client> [--scope user|project] [--force] [--dry-run] [--json]",
+      usage: "install <org> <client> [--scope user|project] [--force] [--dry-run] [--allow-multiple-clients] [--remove-global] [--json]",
       mutates: true,
       requires_tty: false,
       destructive: false,
-      description: "Merge an mcpServers entry into a client config. --dry-run prints the entry without writing.",
+      description: "Merge an mcpServers entry into a client config. Default scope is the current folder (project) for claude-code/cursor; run it from the client folder. An org is refused in a second client unless --allow-multiple-clients. --remove-global also removes an existing global entry. Unsupported clients get a ready-to-paste snippet. --dry-run prints the entry without writing.",
       clients: ["claude-code","claude-desktop","cursor"],
-      output: {shape: "object", fields: ["ok","org","client","scope","path","dry_run"]}
+      output: {shape: "object", fields: ["ok","org","client","scope","path","dry_run","removed_global","notes"]}
     },
     {
       name: "remove",
