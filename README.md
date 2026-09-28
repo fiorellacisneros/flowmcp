@@ -72,11 +72,11 @@ show help text in English or Español, and remembers it
 | `add <org> [--label NAME]` | Register org metadata (no secret) |
 | `secret-set <org>` | Interactively paste a token (TTY only) |
 | `rotate <org>` | Interactively replace a stored token (TTY only) |
-| `connect <org> [--label NAME]` | Add/reconnect an org via browser OAuth — no setup, needs the user present |
+| `connect <org> [--label NAME]` | Add/reconnect an org via browser OAuth — no setup, needs the user present. `connect --missing` signs in every org that has no saved session, one at a time (Enter connects, `s` skips, `q` quits) |
 | `list [--json] [--fast]` | List orgs, whether each one works right now (checked against Webflow, takes a few seconds; `--fast` only checks for a saved login), and which clients it is installed in |
 | `inspect <org> [--live] [--json]` | Show profile detail; `--live` re-runs `test` first |
 | `test <org> [--json]` | Validate the stored credentials |
-| `install <org> <client> [--scope user\|project] [--force] [--dry-run] [--json]` | Merge an `mcpServers` entry into a client config |
+| `install <org> <client> [--scope user\|project] [--force] [--dry-run] [--allow-multiple-clients] [--remove-global] [--json]` | Merge an `mcpServers` entry into a client config. Run it from the client's folder: `claude-code` and `cursor` install for that folder by default (`--scope user` for every session). Refuses an org already in another client; already installed the same way is not an error; unsupported clients get a snippet to paste |
 | `remove <org> --yes [--from client:scope]... [--dry-run] [--json]` | Delete profile + credentials, optionally strip client entries |
 | `rename <old-org> <new-org> [--dry-run] [--json]` | Rename an org — no re-login needed |
 | `debug <org> [--json]` | Diagnose profile/credential/network/config issues |
