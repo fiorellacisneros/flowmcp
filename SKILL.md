@@ -151,7 +151,7 @@ flowmcp add <org> [--label "Name"]
 flowmcp secret-set <org>                 # human-only, TTY required
 flowmcp rotate <org>                     # human-only, TTY required
 flowmcp connect <org> [--label "Name"]   # opens a browser, needs the user present
-flowmcp list [--json]
+flowmcp list [--json] [--fast]           # checks each org against Webflow (~10s); --fast = saved login only
 flowmcp inspect <org> [--live] [--json]
 flowmcp test <org> [--json]
 flowmcp install <org> <client> [--scope user|project] [--force] [--dry-run] [--json]

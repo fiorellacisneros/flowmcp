@@ -43,7 +43,8 @@ fmcp connect acme --label "Acme Corp"
 # opens your browser -> client approves access -> Ctrl+C once connected -> done
 
 fmcp test acme
-fmcp install acme claude-code --scope project
+cd ~/clients/acme          # the folder you work on this client in
+fmcp install acme claude-code
 ```
 
 No OAuth App to create, no client ID/secret to manage — `connect` shells out
@@ -55,7 +56,8 @@ manually-pasted token instead:
 fmcp add acme --label "Acme Corp"
 fmcp secret-set acme     # run this yourself, in your own terminal — TTY only
 fmcp test acme
-fmcp install acme claude-code --scope project
+cd ~/clients/acme          # the folder you work on this client in
+fmcp install acme claude-code
 # restart the target app to pick up the new MCP server
 ```
 
@@ -71,7 +73,7 @@ show help text in English or Español, and remembers it
 | `secret-set <org>` | Interactively paste a token (TTY only) |
 | `rotate <org>` | Interactively replace a stored token (TTY only) |
 | `connect <org> [--label NAME]` | Add/reconnect an org via browser OAuth — no setup, needs the user present |
-| `list [--json]` | List orgs + last test status (no secrets) |
+| `list [--json] [--fast]` | List orgs, whether each one works right now (checked against Webflow, takes a few seconds; `--fast` only checks for a saved login), and which clients it is installed in |
 | `inspect <org> [--live] [--json]` | Show profile detail; `--live` re-runs `test` first |
 | `test <org> [--json]` | Validate the stored credentials |
 | `install <org> <client> [--scope user\|project] [--force] [--dry-run] [--json]` | Merge an `mcpServers` entry into a client config |
