@@ -20,3 +20,14 @@ wfw_mcp_remote_connected() {
   [[ -d "$dir" ]] || return 1
   find "$dir" -type f -name '*_tokens.json' 2>/dev/null | grep -q .
 }
+
+# wfw_org_has_session <org> <auth_method> — true if the org can authenticate
+# right now: a completed mcp-remote login, or a stored PAT. This is the live
+# state, unlike profile.last_test, which is only whatever the last `test` saw.
+wfw_org_has_session() {
+  if [[ "$2" == "mcp-remote" ]]; then
+    wfw_mcp_remote_connected "$1"
+  else
+    wfw_secret_exists "$1"
+  fi
+}
