@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Usage: flowmcp connect <org> [--label "Name"]
+# Usage: flowmcp connect <org> [--label "Name"]   |   flowmcp connect --missing
 #
 # Human-friendly alternative to add + secret-set: opens a browser, the
 # client logs into their own Webflow account and approves access, and the
@@ -15,7 +15,34 @@
 source "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/../lib/bootstrap.sh"
 wfw_require_npx
 
-org="${1:?Usage: flowmcp connect <org> [--label \"Name\"]}"
+# --missing: sign in every OAuth org that has no saved session, one at a time.
+if [[ "${1:-}" == "--missing" ]]; then
+  pending=()
+  for candidate in $(wfw_profile_list); do
+    method="$(jq -r '.auth_method // "pat"' <<<"$(wfw_profile_read "$candidate")")"
+    [[ "$method" == "mcp-remote" ]] || continue
+    wfw_mcp_remote_connected "$candidate" || pending+=("$candidate")
+  done
+  if [[ ${#pending[@]} -eq 0 ]]; then
+    wfw_say_ok "$(wfw_t msg_connect_none_missing)"
+    exit 0
+  fi
+  wfw_say_next "$(wfw_t msg_connect_missing_list "$(IFS=,; echo "${pending[*]}" | sed 's/,/, /g')")"
+  # Ctrl+C is how you finish each login; it must not also abort this loop.
+  trap '' INT
+  for candidate in "${pending[@]}"; do
+    printf '%s' "$(wfw_t msg_connect_missing_next "$candidate")"
+    reply=""
+    read -r reply || reply="q"
+    if [[ "$reply" == "q" || "$reply" == "Q" ]]; then break; fi
+    bash "$WFW_COMMANDS_DIR/connect.sh" "$candidate" || true
+    echo
+  done
+  trap - INT
+  exit 0
+fi
+
+org="${1:?Usage: flowmcp connect <org> [--label \"Name\"] | flowmcp connect --missing}"
 shift || true
 label="$org"
 while [[ $# -gt 0 ]]; do
@@ -52,7 +79,7 @@ if wfw_mcp_remote_connected "$org"; then
   wfw_profile_set_auth_method "$org" "mcp-remote"
   wfw_audit_log "connect" "$org" "ok"
   wfw_say_ok "$(wfw_t msg_connect_success "$org")"
-  wfw_say_next "$(wfw_t msg_connect_next "$org" "$org")"
+  wfw_say_next "$(wfw_t msg_connect_next "$org")"
 else
   wfw_audit_log "connect" "$org" "fail" "no completed session found"
   wfw_say_err "$(wfw_t msg_connect_fail "$org")"
